@@ -5,8 +5,6 @@ describe('Controller: MainCtrl', function () {
   // load the controller's module
   beforeEach(module('covanceChallengeApp'));
 
-  var data = irisFlowerDataSet.data;
-
   var MainCtrl,
     scope,
     $httpBackend;
@@ -19,7 +17,7 @@ describe('Controller: MainCtrl', function () {
         {'sepalLength': '5.1', 'sepalWidth': '3.5', 'petalLength': '1.4', 'petalWidth': '0.1', 'species': 'I. setosa'},
         {'sepalLength': '4.9', 'sepalWidth': '3.0', 'petalLength': '1.4', 'petalWidth': '0.2', 'species': 'I. setosa'},
         {'sepalLength': '4.7', 'sepalWidth': '3.2', 'petalLength': '1.3', 'petalWidth': '0.2', 'species': 'I. setosa'},
-        {'sepalLength': '4.6', 'sepalWidth': '3.1', 'petalLength': '1.5', 'petalWidth': '0.2', 'species': 'I. setosa'},
+        {'sepalLength': '4.6', 'sepalWidth': '3.1', 'petalLength': '1.5', 'petalWidth': '0.2', 'species': 'I. setosa'}
       ]);
     scope = $rootScope.$new();
     MainCtrl = $controller('MainCtrl', {
