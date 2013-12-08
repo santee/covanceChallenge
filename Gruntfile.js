@@ -60,7 +60,7 @@ module.exports = function (grunt) {
           '<%= yeoman.app %>/<%= yeoman.views %>/{,*//*}*.{html,jade}',
           '{.tmp,<%= yeoman.app %>}/styles/{,*//*}*.css',
           '{.tmp,<%= yeoman.app %>}/scripts/{,*//*}*.js',
-          '<%= yeoman.app %>/images/{,*//*}*.{png,jpg,jpeg,gif,webp,svg}',
+          '<%= yeoman.app %>/images/{,*//*}*.{png,jpg,jpeg,gif,webp,svg}'
         ],
         options: {
           livereload: true
@@ -144,9 +144,9 @@ module.exports = function (grunt) {
       }
     },
 
-    
 
-    
+
+
 
     // Renames files for browser caching purposes
     rev: {
@@ -293,7 +293,7 @@ module.exports = function (grunt) {
             'lib/**/*'
           ]
         }]
-      },  
+      },
       styles: {
         expand: true,
         cwd: '<%= yeoman.app %>/styles',
@@ -375,6 +375,17 @@ module.exports = function (grunt) {
   grunt.registerTask('server', function () {
     grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
     grunt.task.run(['serve']);
+  });
+
+  grunt.registerTask('openOnly', function() {
+    grunt.task.run([
+      'clean:server',
+      'concurrent:server',
+      'autoprefixer',
+      'express:dev',
+      //'open',
+      'watch'
+    ]);
   });
 
   grunt.registerTask('test', [
