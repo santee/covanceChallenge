@@ -145,9 +145,6 @@ module.exports = function (grunt) {
     },
 
 
-
-
-
     // Renames files for browser caching purposes
     rev: {
       dist: {
@@ -265,7 +262,7 @@ module.exports = function (grunt) {
           dot: true,
           cwd: '<%= yeoman.app %>/<%= yeoman.views %>',
           dest: '<%= yeoman.views %>',
-          src: '**/*.jade',
+          src: '**/*.jade'
         }, {
           expand: true,
           cwd: '.tmp/images',
@@ -375,17 +372,6 @@ module.exports = function (grunt) {
   grunt.registerTask('server', function () {
     grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
     grunt.task.run(['serve']);
-  });
-
-  grunt.registerTask('openOnly', function() {
-    grunt.task.run([
-      'clean:server',
-      'concurrent:server',
-      'autoprefixer',
-      'express:dev',
-      //'open',
-      'watch'
-    ]);
   });
 
   grunt.registerTask('test', [
