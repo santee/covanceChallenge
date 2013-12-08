@@ -23,5 +23,14 @@ describe('Distances: euclidean distance', function () {
     expect(distance).toBe(2);
   });
 
+  it('should work with typical iris data set element', function() {
+
+    var a = {'sepalLength': '5.1', 'sepalWidth': '3.5', 'petalLength': '1.4', 'petalWidth': '0.1', 'species': 'I. setosa'};
+    var b = {'sepalLength': '4.9', 'sepalWidth': '3.0', 'petalLength': '1.4', 'petalWidth': '0.2', 'species': 'I. setosa'};
+
+    var distance = distances.euclideanDistance(a,b);
+    expect(distance).toBeCloseTo(0.54, 0.01);
+
+  });
 
 });
