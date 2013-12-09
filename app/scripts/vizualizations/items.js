@@ -8,7 +8,7 @@ angular.module('items', ['dataProvider'])
     $scope.commonTextProperties = [];
     $scope.commonNumericProperties = [];
 
-    clusteredData.then( function(cluster){
+    clusteredData.then(function(cluster) {
         $scope.allItems = cluster.getAllItems();
         $scope.cluster = cluster;
         $scope.commonTextProperties = cluster.getCommonTextProperties();
