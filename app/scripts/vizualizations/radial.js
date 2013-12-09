@@ -1,38 +1,44 @@
 'use strict';
 
 angular.module('radial', ['dataProvider', 'd3'])
-  .directive('d3Radial', ['d3', function (d3) {
-
+  .directive('d3Radial', ['d3','clusteredData', function (d3, clusteredData) {
     return {
       restrict: 'EA',
       scope: {},
       link: function (scope, element, attrs) {
 
-        var dataset = [5, 10, 15, 20, 25];
+        clusteredData.then(function (data) {
 
-        var svg = d3.select(element[0])
-          .append('svg')
-          .attr('width', 500)
-          .attr('h', 50);
+          scope.data = data;
+          var svg = d3.select(element[0])
+            .append('svg')
+            .attr('width', '100%');
 
-        scope.render = function (data) {
+          scope.render = function (data) {
 
-          var circles = svg.selectAll('circle')
-            .data(dataset)
-            .enter()
-            .append('circle');
+            svg.selectAll('*').remove();
 
-          circles.attr('cx', function (d, i) {
-            return i * 50 + 25;
-          })
-            .attr('cy', 25)
-            .attr('r', function (d) {
-              return d;
-            });
+            if (!data) {
+              return;
+            }
 
-        };
+            var circles = svg.selectAll('circle')
+              .data(data)
+              .enter()
+              .append('circle');
 
-        scope.render();
+            circles.attr('cx', function (d, i) {
+              return i * 50 + 25;
+            })
+              .attr('cy', 25)
+              .attr('r', function (d) {
+                return d;
+              });
+
+          };
+
+          scope.render();
+        });
       }
     };
   }]);
