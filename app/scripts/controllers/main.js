@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('covanceChallengeApp')
-  .controller('MainCtrl', function ($scope, $http) {
-    $http.get('/api/clusters').success(function(clusters) {
+  .controller('MainCtrl', ['$scope', 'clusteredData', function ($scope, clusteredData) {
+    clusteredData.then( function(clusters) {
       $scope.clusters = clusters;
     });
-  });
+  }]);

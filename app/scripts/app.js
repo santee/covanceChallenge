@@ -4,7 +4,8 @@ angular.module('covanceChallengeApp', [
   'ngCookies',
   'ngResource',
   'ngSanitize',
-  'ngRoute'
+  'ngRoute',
+  'dataProvider'
 ])
   .config(function ($routeProvider, $locationProvider) {
     $routeProvider
