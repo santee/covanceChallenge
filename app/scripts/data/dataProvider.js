@@ -7,7 +7,7 @@ angular
     var d = $q.defer();
 
     var processData = function ( data ) {
-      $log.info('clusters loaded');
+      $log.info('Clusters loaded');
 
       d.resolve(data);
     };
