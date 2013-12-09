@@ -7,9 +7,9 @@ angular
     var d = $q.defer();
 
     var processData = function ( response ) {
-      $log.info('Clusters loaded');
-
+      $log.info('Clusters loaded, generating view model...');
       var cluster = new ClusterNode(response.data);
+      $log.info('View model generated');
       d.resolve(cluster);
     };
 
@@ -22,14 +22,56 @@ angular
 
     return d.promise;
   }])
-  .factory('ClusterNode', function() {
+
+  .factory('ItemViewModel', function() {
+    function ItemViewModel(item, cluster) {
+      var self = this;
+
+      self.cluster = cluster;
+
+      self.isSelected = function() {
+        return self.cluster.isSelected();
+      };
+
+      self.select = function(value) {
+        self.cluster.select(value);
+      };
+
+      self.toggleSelect = function() {
+        self.select(!self.isSelected());
+      };
+
+      var itemProperties = Object.getOwnPropertyNames(item);
+
+      self.numericProperties = _.filter(itemProperties, function(property) {
+        var value = item[property];
+        return _.isNumber(value) && !_.isNaN(value);
+      });
+
+      self.textProperties = _.filter(itemProperties, function(property) {
+        var value = item[property];
+        return _.isString(value);
+      });
+
+      self.allProperties = _.union(self.numericProperties, self.textProperties);
+      _.each(self.allProperties, function(property){
+        self[property] = item[property];
+      });
+    }
+
+    return ItemViewModel;
+  })
+  .factory('ClusterNode', ['ItemViewModel', function(ItemViewModel) {
 
     function ClusterNodeViewModel(treeData) {
       var self = this;
       self.id = treeData.id;
-      self.selected = false;
+      var selected = false;
 
-      self.items = treeData.items;
+      self.items = _.map(treeData.items, function(item) {
+        return new ItemViewModel(item, self);
+      });
+
       self.children = _.map(treeData.children, function(child) {
         return new ClusterNodeViewModel(child);
       });
@@ -39,7 +81,23 @@ angular
           return _.union(memo, child.getAllItems());
         }, self.items);
       };
+
+      self.isSelected = function() {
+        return selected;
+      };
+
+      self.select = function(value) {
+        selected = value;
+
+        _.each(self.children, function(child) {
+          child.select(value);
+        });
+      };
+
+      self.toggleSelect = function() {
+        self.select(!selected);
+      };
     }
 
     return ClusterNodeViewModel;
-  });
+  }]);

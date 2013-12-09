@@ -8,7 +8,7 @@
 
             <h3>Items ({{allItems.length}})</h3>
             <ul ng-repeat="item in allItems">
-                <li>{{item}}</li>
+                <li ng-class="{selected: item.isSelected()}" ng-click="item.toggleSelect()">{{item.isSelected()}}</li>
             </ul>
 
         </div>
