@@ -34,3 +34,18 @@ describe('Distances: euclidean distance', function () {
   });
 
 });
+
+
+describe('Distances: average coordinage finder', function (){
+
+  it('works with points', function() {
+
+    var a = { x : 1, y : 0};
+    var b = { x : 1, y : 3, text: 'test'};
+    var c = { x : 7, y : 0};
+
+    var coordinates = distances.averageCoordinatesFinder([a,b,c]);
+    expect(coordinates.x).toBe(3);
+    expect(coordinates.y).toBe(1);
+  });
+});
