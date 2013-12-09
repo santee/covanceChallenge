@@ -16,9 +16,7 @@ describe('Clusters: k-means', function(){
 describe('Clusters: hierarhical', function() {
   it('should contain same amount of elements after clustering', function() {
 
-    //var data = iris.data;
-
-    var data = iris.data.slice(0, 50);
+    var data = iris.data;
 
     var clusters = clusterizer.hieararhicalKMeans(data, distances.euclideanDistance, distances.averageCoordinatesFinder);
 
