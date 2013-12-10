@@ -24,6 +24,12 @@ svg {
     stroke: #ddd;
 }
 
+/*TRELLIS styling*/
+
+.circle {
+    opacity: 0.5;
+}
+
 circle.selected {
     fill: black;
     opacity: 1;
@@ -34,10 +40,6 @@ circle.faded {
     opacity: 0.5;
 }
 
-.circle {
-    opacity: 0.5;
-}
-
-.circle {
-    /*opacity: 0.5;*/
+.circle:hover {
+    opacity: 1;
 }
