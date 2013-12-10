@@ -12,22 +12,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('width', '100%');
 
-//          var fisheye = d3.fisheye.circular()
-//            .radius(100)
-//            .distortion(2);
-
-//          svg.on('mousemove', function(){
-//            fisheye.focus(d3.mouse(this));
-//
-//            svg.selectAll('circle')
-//              .each(function(d) {d.fisheye = fisheye(d);})
-//              .attr('cx', function(d) {
-//                return d.fisheye.x;
-//              })
-//              .attr('cy', function(d) { return d.fisheye.y; })
-//              .attr('r', function(d) { return d.fisheye.z * 4.5; });
-//          });
-
           var colors = d3.scale.category10();
 
           var getColor = function (dataItem) {
@@ -46,10 +30,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
             if (dataItem.item.isSelected()) {
               classes.push('selected');
             }
-
-            //var selectedItems = svg.selectAll('circle').classed('selected', true).length;
-
-            //selectedItems.
+            else if (scope.selectedItems.length > 0) {
+              classes.push('faded');
+            }
 
             return classes.join(' ');
           };
@@ -196,13 +179,15 @@ angular.module('trellis', ['dataProvider', 'd3'])
             scope.selectedTextProperties = properties.selectedTextProperties;
 
             scope.clusterItems = cluster.getAllItems();
+            scope.selectedItems = []; //cached selected items for speed
             scope.render();
 
             $rootScope.$watchCollection(function() {
               return _.filter(scope.clusterItems, function(item) {
                 return item.isSelected();
               });
-            }, function() {
+            }, function(selectedItems) {
+              scope.selectedItems = selectedItems;
               scope.update();
             });
 
