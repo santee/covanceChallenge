@@ -12,8 +12,8 @@ angular.module('dataProvider')
     };
 
     var loadProperties = function(cluster) {
-      scope.numericProperties = cluster.getCommonNumericProperties();
-      scope.textProperties = cluster.getCommonTextProperties();
+      scope.selectedNumericProperties = cluster.getCommonNumericProperties();
+      scope.selectedTextProperties = cluster.getCommonTextProperties();
       d.resolve(scope);
     };
 

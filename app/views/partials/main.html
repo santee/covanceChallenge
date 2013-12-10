@@ -4,6 +4,10 @@
 
         <h1>Hello world</h1>
 
+        <div d3-trellis>
+
+        </div>
+
         <div id="list" ng-controller="clustersListCtrl">
 
             <h3>Items ({{allItems.length}})</h3>
@@ -13,10 +17,6 @@
             <ul ng-repeat="item in allItems">
                 <li ng-class="{selected: item.isSelected()}" ng-click="item.toggleSelect()">{{item.isSelected()}}</li>
             </ul>
-
-        </div>
-
-        <div d3-trellis>
 
         </div>
 

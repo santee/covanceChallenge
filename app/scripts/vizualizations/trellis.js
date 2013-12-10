@@ -6,7 +6,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
       return {
         restrict: 'EA',
         scope: {},
-        link: function (scope, element, args) {
+        link: function (scope, element) {
           var svg = d3.select(element[0])
             .append('svg')
             .style('width', '100%');
@@ -20,42 +20,98 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var height = width;
             svg.style('height', height);
 
-            var scale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.2);
+            var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.4, 0.2);
 
-            var xAxis = d3.svg.axis()
-              .scale(scale)
-              .orient('bottom')
-              .ticks(5);
+            scope.points = [];
 
-            var yAxis = d3.svg.axis()
-              .scale(scale)
-              .orient('left')
-              .ticks(5);
+            _.each(numericProperties, function (yProperty, row) {
 
-            var color = d3.scale.category10();
+              _.each(numericProperties, function (xProperty, column) {
 
+                var plotWidth = plotsScale.rangeBand();
+                var plotHeight = plotsScale.rangeBand();
+                var plotX = plotsScale(column);
+                var plotY = plotsScale(row);
 
-            svg.selectAll('.x.axis')
-              .data([1, 2, 3, 4, 5])
+                var data = scope.clusterItems;
+
+                var maxXValue = _.max( data, function(item) {
+                  return item[xProperty];
+                })[xProperty];
+
+                var maxYValue = _.max( data, function(item) {
+                  return item[yProperty];
+                })[yProperty];
+
+                var minXValue = _.min( data, function(item) {
+                  return item[xProperty];
+                })[xProperty];
+
+                var minYValue = _.min( data, function(item) {
+                  return item[yProperty];
+                })[yProperty];
+
+                var maxXScale = maxXValue;
+                var maxYScale = maxYValue;
+
+                var minXScale = minXValue;
+                var minYScale = minYValue;
+
+                //set up scales
+                var xScale = d3.scale.linear()
+                  .domain([minXScale, maxXScale])
+                  .range([0, plotWidth])
+                  .nice();
+
+                var yScale = d3.scale.linear()
+                  .domain([minYScale, maxYScale])
+                  .range([plotHeight, 0])
+                  .nice();
+
+                //set up axis
+
+                var xAxis = d3.svg.axis()
+                  .scale(xScale)
+                  .orient('bottom')
+                  .ticks(4);
+
+                var yAxis = d3.svg.axis()
+                  .scale(yScale)
+                  .orient('left')
+                  .ticks(4);
+
+                svg.append('g')
+                  .attr('class', 'axis')
+                  .attr('transform', 'translate(' + plotX + ',' + (plotY + plotHeight) + ')')
+                  .call(xAxis);
+
+                svg.append('g')
+                  .attr('class', 'axis')
+                  .attr('transform', 'translate(' + plotX + ', ' + plotY + ')')
+                  .call(yAxis);
+
+                scope.points = scope.points.concat(_.map(scope.clusterItems, function(item) {
+                  return {
+                    item: item,
+                    x : plotX + xScale( item[xProperty] ),
+                    y: plotY + yScale( item[yProperty] )
+                  };
+                }));
+              });
+            });
+
+            svg.selectAll('circle')
+              .data(scope.points)
               .enter()
-              .append('g')
-              .attr('class', 'x axis');
-
-            svg.selectAll('.y.axis')
-              .data([1, 2, 3, 4, 5])
-              .enter()
-              .append('g')
-              .attr('class', 'y axis');
-
-            svg.selectAll('text')
-              .data('test')
-              .enter()
-              .append('text')
-              .text(function (d) {
-                return d;
+              .append('circle')
+              .attr('cx', function(d) {
+                return d.x;
               })
-              .color('black');
-
+              .attr('cy', function(d){
+                return d.y;
+              })
+              .attr('r', 2)
+              .attr('class', 'circle');
 
           };
 
@@ -65,7 +121,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var cluster = values[1];
 
             scope.selectedNumericProperties = properties.selectedNumericProperties;
-            scope.cluster = cluster;
+            scope.clusterItems = cluster.getAllItems();
             scope.render(scope.cluster, scope.selectedNumericProperties);
 
           });

@@ -5,7 +5,7 @@ angular.module('radial', ['dataProvider', 'd3'])
     return {
       restrict: 'EA',
       scope: {},
-      link: function (scope, element, attrs) {
+      link: function (scope, element) {
 
         clusteredData.then(function (data) {
 
