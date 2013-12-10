@@ -12,6 +12,22 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('width', '100%');
 
+          var fisheye = d3.fisheye.circular()
+            .radius(100)
+            .distortion(2);
+
+          svg.on('mousemove', function(){
+            fisheye.focus(d3.mouse(this));
+
+            svg.selectAll('circle')
+              .each(function(d) {d.fisheye = fisheye(d);})
+              .attr('cx', function(d) {
+                return d.fisheye.x;
+              })
+              .attr('cy', function(d) { return d.fisheye.y; })
+              .attr('r', function(d) { return d.fisheye.z * 4.5; });
+          });
+
           var colors = d3.scale.category10();
 
           var getColor = function (dataItem) {
