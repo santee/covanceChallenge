@@ -12,21 +12,21 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('width', '100%');
 
-          var fisheye = d3.fisheye.circular()
-            .radius(100)
-            .distortion(2);
+//          var fisheye = d3.fisheye.circular()
+//            .radius(100)
+//            .distortion(2);
 
-          svg.on('mousemove', function(){
-            fisheye.focus(d3.mouse(this));
-
-            svg.selectAll('circle')
-              .each(function(d) {d.fisheye = fisheye(d);})
-              .attr('cx', function(d) {
-                return d.fisheye.x;
-              })
-              .attr('cy', function(d) { return d.fisheye.y; })
-              .attr('r', function(d) { return d.fisheye.z * 4.5; });
-          });
+//          svg.on('mousemove', function(){
+//            fisheye.focus(d3.mouse(this));
+//
+//            svg.selectAll('circle')
+//              .each(function(d) {d.fisheye = fisheye(d);})
+//              .attr('cx', function(d) {
+//                return d.fisheye.x;
+//              })
+//              .attr('cy', function(d) { return d.fisheye.y; })
+//              .attr('r', function(d) { return d.fisheye.z * 4.5; });
+//          });
 
           var colors = d3.scale.category10();
 
@@ -46,6 +46,10 @@ angular.module('trellis', ['dataProvider', 'd3'])
             if (dataItem.item.isSelected()) {
               classes.push('selected');
             }
+
+            //var selectedItems = svg.selectAll('circle').classed('selected', true).length;
+
+            //selectedItems.
 
             return classes.join(' ');
           };
@@ -81,7 +85,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             svg.selectAll('circle')
               .on('click', function (point) {
                 point.item.toggleSelect();
-                scope.update();
+                //scope.update();
                 $rootScope.$apply();
 
                 //svg.selectAll('selected')
@@ -193,6 +197,17 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
             scope.clusterItems = cluster.getAllItems();
             scope.render();
+
+            $rootScope.$watchCollection(function() {
+              return _.filter(scope.clusterItems, function(item) {
+                return item.isSelected();
+              });
+            }, function() {
+              scope.update();
+            });
+
+            _.each(scope.clusterItems, function(item) {
+            });
 
           });
         }
