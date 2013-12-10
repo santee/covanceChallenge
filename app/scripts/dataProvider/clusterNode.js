@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('dataProvider')
-  .factory('ClusterNode', ['ItemViewModel', function (ItemViewModel) {
+  .factory('ClusterNode', ['ItemViewModel', '$log', function (ItemViewModel, $log) {
 
     function ClusterNodeViewModel(treeData) {
       var self = this;
@@ -31,6 +31,11 @@ angular.module('dataProvider')
       };
 
       self.select = function (value) {
+
+        if (selected !== value) {
+          $log.info('Cluster ' + self.id + ' selection status change to: ' + value);
+        }
+
         selected = value;
 
         _.each(self.children, function (child) {

@@ -31,7 +31,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               classes.push('selected');
             }
 
-            return classes.join();
+            return classes.join(' ');
           };
 
 
