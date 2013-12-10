@@ -37,6 +37,26 @@ angular.module('trellis', ['dataProvider', 'd3'])
             return classes.join(' ');
           };
 
+          var onCircleClick = function(point) {
+
+            var ctrlKey = d3.event.ctrlKey;
+
+            if (ctrlKey) {
+              //allow multi choice
+              point.item.toggleSelect();
+            }
+            else {
+              _.each(scope.selectedItems, function(item) {
+                item.select(false);
+              });
+
+              point.item.select(true);
+            }
+
+            //scope.update();
+            $rootScope.$apply();
+          };
+
 
           scope.update = function () {
             //update old properties
@@ -66,13 +86,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             //var specify
 
             svg.selectAll('circle')
-              .on('click', function (point) {
-                point.item.toggleSelect();
-                //scope.update();
-                $rootScope.$apply();
-
-                //svg.selectAll('selected')
-              });
+              .on('click', onCircleClick);
           };
 
           scope.render = function () {
