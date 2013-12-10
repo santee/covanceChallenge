@@ -40,7 +40,12 @@ circle.faded {
     opacity: 0.5;
 }
 
-.circle:hover {
+circle.hover {
     opacity: 1;
     cursor: pointer;
 }
+
+/*.circle:hover {*/
+    /*opacity: 1;*/
+    /*cursor: pointer;*/
+/*}*/

@@ -14,6 +14,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var colors = d3.scale.category10();
 
+          var defaultRadius = 3;
+
           var getColor = function (dataItem) {
             var textProperties = scope.selectedTextProperties;
             var value = _.reduce(textProperties, function (memo, property) {
@@ -60,6 +62,18 @@ angular.module('trellis', ['dataProvider', 'd3'])
             $rootScope.$apply();
           };
 
+          var onCircleMouseOver = function(point) {
+            if (!d3.event.shiftKey){
+              d3.select(this).attr('r', defaultRadius * 2);
+              d3.select(this).classed('hover', true);
+            }
+          };
+
+          var onCircleMouseOut = function(point) {
+            d3.select(this).attr('r', defaultRadius);
+            d3.select(this).classed('hover', false);
+          };
+
 
           scope.update = function () {
             //update old properties
@@ -82,14 +96,17 @@ angular.module('trellis', ['dataProvider', 'd3'])
               .attr('r', 0)
               .transition()
               .duration(1000)
-              .attr('r', 3)
+              .attr('r', defaultRadius)
               .attr('class', getPointClasses)
               .attr('fill', getColor);
 
             //var specify
 
             svg.selectAll('circle')
-              .on('click', onCircleClick);
+              .on('click', onCircleClick)
+              .on('mouseover', onCircleMouseOver)
+              .on('mouseout', onCircleMouseOut);
+
           };
 
           scope.render = function () {
