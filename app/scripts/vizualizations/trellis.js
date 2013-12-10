@@ -45,6 +45,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
               //allow multi choice
               point.item.toggleSelect();
             }
+            else if (scope.selectedItems.length === 1) {
+              point.item.toggleSelect();
+            }
             else {
               _.each(scope.selectedItems, function(item) {
                 item.select(false);
