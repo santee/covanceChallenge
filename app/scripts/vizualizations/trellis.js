@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trellis', ['dataProvider', 'd3'])
-  .directive('d3Trellis', ['$q', 'd3', 'itemPropertiesSelector', 'clusteredData',
-    function ($q, d3, itemPropertiesSelector, clusteredData) {
+  .directive('d3Trellis', ['$q', '$rootScope', 'd3', 'itemPropertiesSelector', 'clusteredData',
+    function ($q, $rootScope, d3, itemPropertiesSelector, clusteredData) {
       return {
         restrict: 'EA',
         scope: {
@@ -11,7 +11,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
           var svg = d3.select(element[0])
             .append('svg')
             .style('width', '100%');
-
 
           var colors = d3.scale.category10();
 
@@ -37,10 +36,40 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
 
           scope.update = function () {
-            d3.selectAll('circles')
+            //update old properties
+            svg.selectAll('circle')
               .data(scope.points)
               .attr('class', getPointClasses)
               .attr('fill', getColor);
+
+            //add new properties
+            svg.selectAll('circle')
+              .data(scope.points)
+              .enter()
+              .append('circle')
+              .attr('cx', function (d) {
+                return d.x;
+              })
+              .attr('cy', function (d) {
+                return d.y;
+              })
+              .attr('r', 0)
+              .transition()
+              .duration(1000)
+              .attr('r', 3)
+              .attr('class', getPointClasses)
+              .attr('fill', getColor);
+
+            //var specify
+
+            svg.selectAll('circle')
+              .on('click', function (point) {
+                point.item.toggleSelect();
+                scope.update();
+                $rootScope.$apply();
+
+                //svg.selectAll('selected')
+              });
           };
 
           scope.render = function () {
@@ -135,32 +164,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               });
             });
 
-            scope.circles = svg.selectAll('circle')
-              .data(scope.points)
-              .enter()
-              .append('circle')
-              .attr('cx', function (d) {
-                return d.x;
-              })
-              .attr('cy', function (d) {
-                return d.y;
-              })
-              .attr('r', 0)
-              .transition()
-              .duration(1000)
-              .attr('r', 3)
-              .attr('class', getPointClasses)
-              .attr('fill', getColor);
-
-            //var specify
-
-            svg.selectAll('circle')
-              .on('click', function (point) {
-                point.item.toggleSelect();
-                scope.update();
-
-                //svg.selectAll('selected')
-              });
+            scope.update();
           };
 
           $q.all([itemPropertiesSelector.deferred, clusteredData]).then(function (values) {
