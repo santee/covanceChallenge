@@ -11,7 +11,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('width', '100%');
 
-          scope.render = function (cluster, numericProperties) {
+          scope.render = function () {
+            var numericProperties = scope.selectedNumericProperties;
+            var textProperties = scope.selectedTextProperties;
 
             svg.selectAll('*').remove();
 
@@ -35,19 +37,19 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var data = scope.clusterItems;
 
-                var maxXValue = _.max( data, function(item) {
+                var maxXValue = _.max(data, function (item) {
                   return item[xProperty];
                 })[xProperty];
 
-                var maxYValue = _.max( data, function(item) {
+                var maxYValue = _.max(data, function (item) {
                   return item[yProperty];
                 })[yProperty];
 
-                var minXValue = _.min( data, function(item) {
+                var minXValue = _.min(data, function (item) {
                   return item[xProperty];
                 })[xProperty];
 
-                var minYValue = _.min( data, function(item) {
+                var minYValue = _.min(data, function (item) {
                   return item[yProperty];
                 })[yProperty];
 
@@ -90,29 +92,38 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .attr('transform', 'translate(' + plotX + ', ' + plotY + ')')
                   .call(yAxis);
 
-                scope.points = scope.points.concat(_.map(scope.clusterItems, function(item) {
+                scope.points = scope.points.concat(_.map(scope.clusterItems, function (item) {
                   return {
                     item: item,
-                    x : plotX + xScale( item[xProperty] ),
-                    y: plotY + yScale( item[yProperty] )
+                    x: plotX + xScale(item[xProperty]),
+                    y: plotY + yScale(item[yProperty])
                   };
                 }));
               });
             });
 
+
+            var color = d3.scale.category10();
+
             svg.selectAll('circle')
               .data(scope.points)
               .enter()
               .append('circle')
-              .attr('cx', function(d) {
+              .attr('cx', function (d) {
                 return d.x;
               })
-              .attr('cy', function(d){
+              .attr('cy', function (d) {
                 return d.y;
               })
               .attr('r', 2)
-              .attr('class', 'circle');
+              .attr('class', 'circle')
+              .attr('fill', function (d) {
+                var value = _.reduce(textProperties, function (memo, property) {
+                  return memo + '_' + d.item[property];
+                }, '');
 
+                return color(value);
+              });
           };
 
           $q.all([itemPropertiesSelector.deferred, clusteredData]).then(function (values) {
@@ -121,8 +132,10 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var cluster = values[1];
 
             scope.selectedNumericProperties = properties.selectedNumericProperties;
+            scope.selectedTextProperties = properties.selectedTextProperties;
+
             scope.clusterItems = cluster.getAllItems();
-            scope.render(scope.cluster, scope.selectedNumericProperties);
+            scope.render();
 
           });
         }
