@@ -5,7 +5,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
     function ($q, d3, itemPropertiesSelector, clusteredData) {
       return {
         restrict: 'EA',
-        scope: {},
+        scope: {
+        },
         link: function (scope, element) {
           var svg = d3.select(element[0])
             .append('svg')
@@ -22,7 +23,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var height = width;
             svg.style('height', height);
 
-            var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.4, 0.2);
+            var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.3, 0.2);
 
             scope.points = [];
 
@@ -75,12 +76,14 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 var xAxis = d3.svg.axis()
                   .scale(xScale)
                   .orient('bottom')
-                  .ticks(4);
+                  .ticks(4)
+                  .tickSize(-plotWidth, 0,0)
 
                 var yAxis = d3.svg.axis()
                   .scale(yScale)
                   .orient('left')
-                  .ticks(4);
+                  .ticks(4)
+                  .tickSize(-plotHeight, 0,0)
 
                 svg.append('g')
                   .attr('class', 'axis')
@@ -115,7 +118,10 @@ angular.module('trellis', ['dataProvider', 'd3'])
               .attr('cy', function (d) {
                 return d.y;
               })
-              .attr('r', 2)
+              .attr('r', 0)
+              .transition()
+              .duration(1000)
+              .attr('r', 3)
               .attr('class', 'circle')
               .attr('fill', function (d) {
                 var value = _.reduce(textProperties, function (memo, property) {
@@ -123,6 +129,12 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 }, '');
 
                 return color(value);
+              })
+              .on('click', function() {
+                this.item.toggleSelect();
+              })
+              .on('mouseover', function() {
+                this.item.toggleSelect();
               });
           };
 

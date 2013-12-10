@@ -17,10 +17,13 @@ svg {
 
 .frame {
     fill: none;
-    stroke: #aaa
+    stroke: #aaa;
 }
-
 
 .axis line {
     stroke: #ddd;
+}
+
+.circle {
+    opacity: 0.5;
 }
