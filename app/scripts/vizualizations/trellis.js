@@ -12,9 +12,39 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('width', '100%');
 
+
+          var colors = d3.scale.category10();
+
+          var getColor = function (dataItem) {
+            var textProperties = scope.selectedTextProperties;
+            var value = _.reduce(textProperties, function (memo, property) {
+              return memo + '_' + dataItem.item[property];
+            }, '');
+
+            return colors(value);
+          };
+
+
+          var getPointClasses = function(dataItem) {
+            var classes = ['circle'];
+
+            if (dataItem.item.isSelected()) {
+              classes.push('selected');
+            }
+
+            return classes.join();
+          };
+
+
+          scope.update = function () {
+            d3.selectAll('circles')
+              .data(scope.points)
+              .attr('class', getPointClasses)
+              .attr('fill', getColor);
+          };
+
           scope.render = function () {
             var numericProperties = scope.selectedNumericProperties;
-            var textProperties = scope.selectedTextProperties;
 
             svg.selectAll('*').remove();
 
@@ -77,13 +107,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .scale(xScale)
                   .orient('bottom')
                   .ticks(4)
-                  .tickSize(-plotWidth, 0,0)
+                  .tickSize(-plotWidth, 0, 0);
 
                 var yAxis = d3.svg.axis()
                   .scale(yScale)
                   .orient('left')
                   .ticks(4)
-                  .tickSize(-plotHeight, 0,0)
+                  .tickSize(-plotHeight, 0, 0);
 
                 svg.append('g')
                   .attr('class', 'axis')
@@ -105,10 +135,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               });
             });
 
-
-            var color = d3.scale.category10();
-
-            svg.selectAll('circle')
+            scope.circles = svg.selectAll('circle')
               .data(scope.points)
               .enter()
               .append('circle')
@@ -122,19 +149,17 @@ angular.module('trellis', ['dataProvider', 'd3'])
               .transition()
               .duration(1000)
               .attr('r', 3)
-              .attr('class', 'circle')
-              .attr('fill', function (d) {
-                var value = _.reduce(textProperties, function (memo, property) {
-                  return memo + '_' + d.item[property];
-                }, '');
+              .attr('class', getPointClasses)
+              .attr('fill', getColor);
 
-                return color(value);
-              })
-              .on('click', function() {
-                this.item.toggleSelect();
-              })
-              .on('mouseover', function() {
-                this.item.toggleSelect();
+            //var specify
+
+            svg.selectAll('circle')
+              .on('click', function (point) {
+                point.item.toggleSelect();
+                scope.update();
+
+                //svg.selectAll('selected')
               });
           };
 
