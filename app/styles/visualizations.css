@@ -31,7 +31,7 @@ svg {
 }
 
 circle.selected {
-    fill: black;
+    /*fill: black;*/
     opacity: 1;
 }
 
