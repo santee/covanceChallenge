@@ -7,9 +7,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       scope: {},
       link: function (scope, element) {
 
-        clusteredData.then(function (data) {
-
-          scope.data = data;
+        clusteredData.then(function (cluster) {
+          scope.cluster = cluster;
           var svg = d3.select(element[0])
             .append('svg')
             .attr('width', '100%');
