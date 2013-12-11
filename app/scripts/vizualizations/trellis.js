@@ -25,11 +25,19 @@ angular.module('trellis', ['dataProvider', 'd3'])
               return _.filter(scope.clusterItems, function (item) {
                 return item.isSelected();
               });
-            }, function (selectedItems, oldSelectedItems) {
+            }, function (selectedItems) {
               scope.selectedItems = selectedItems;
 
               svg.selectAll('circle')
-                .attr('class', getPointClasses);
+                .classed('faded', function(d) {
+                  return scope.selectedItems.length > 0 && !d.isSelected();
+                })
+                .classed('selected', function(d) {
+                  return d.isSelected();
+                });
+
+              //svg.selectAll('circle')
+                //.attr('class', getPointClasses);
             });
 
           });
