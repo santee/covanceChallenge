@@ -40,44 +40,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
             return classes.join(' ');
           };
 
-          var onCircleClick = function (point) {
-
-            var ctrlKey = d3.event.ctrlKey;
-
-            if (ctrlKey) {
-              //allow multi choice
-              point.item.toggleSelect();
-            }
-            else if (scope.selectedItems.length === 1 && point.item.isSelected()) {
-              point.item.toggleSelect();
-            }
-            else {
-              _.each(scope.selectedItems, function (item) {
-                item.select(false);
-              });
-
-              point.item.select(true);
-            }
-
-            scope.update();
-          };
-
-          var onCircleMouseOver = function () {
-            if (!d3.event.shiftKey) {
-              d3.select(this).attr('r', defaultRadius * 2);
-              d3.select(this).classed('hover', true);
-            }
-          };
-
-          var onCircleMouseOut = function () {
-            d3.select(this).attr('r', defaultRadius);
-            d3.select(this).classed('hover', false);
-          };
-
-          scope.update = function () {
-            $rootScope.$apply();
-          };
-
 
           scope.render = function () {
             var numericProperties = scope.selectedNumericProperties;
@@ -92,6 +54,47 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.3, 0.2);
 
             var brushCell;
+
+            var currentBrush;
+
+            var onCircleClick = function (point) {
+
+              d3.select(brushCell).call( currentBrush.clear() );
+              var ctrlKey = d3.event.ctrlKey;
+
+              if (ctrlKey) {
+                //allow multi choice
+                point.item.toggleSelect();
+              }
+              else if (scope.selectedItems.length === 1 && point.item.isSelected()) {
+                point.item.toggleSelect();
+              }
+              else {
+                _.each(scope.selectedItems, function (item) {
+                  item.select(false);
+                });
+
+                point.item.select(true);
+              }
+
+              scope.update();
+            };
+
+            var onCircleMouseOver = function () {
+              if (!d3.event.shiftKey) {
+                d3.select(this).attr('r', defaultRadius * 2);
+                d3.select(this).classed('hover', true);
+              }
+            };
+
+            var onCircleMouseOut = function () {
+              d3.select(this).attr('r', defaultRadius);
+              d3.select(this).classed('hover', false);
+            };
+
+            scope.update = function () {
+              $rootScope.$apply();
+            };
 
             scope.points = [];
 
@@ -156,6 +159,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var brushStart = function (p) {
                   if (brushCell !== this) {
+                    currentBrush = brush;
                     d3.select(brushCell).call(brush.clear());
                     brushCell = this;
                   }
@@ -169,9 +173,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
                     var outOfSelection = e[0][0] > item[xProperty] || item[xProperty] > e[1][0] ||
                                          e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
 
-                    if (item.isSelected() !== outOfSelection) {
+                    if (item.isSelected() === outOfSelection) {
                       elementsChanged = true;
-                      item.toggleSelect();
+                      item.select(!outOfSelection);
                     }
                   });
 
