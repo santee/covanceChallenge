@@ -45,6 +45,17 @@ circle.hover {
     cursor: pointer;
 }
 
+rect.area {
+    opacity: 0;
+    /*cursor: crosshair;*/
+}
+
+rect.extent {
+    fill: #000;
+    fill-opacity: .125;
+    stroke: #fff;
+}
+
 /*.circle:hover {*/
     /*opacity: 1;*/
     /*cursor: pointer;*/
