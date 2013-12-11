@@ -69,21 +69,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
             return colors(value);
           };
 
-
-          var getPointClasses = function (dataItem) {
-            var classes = ['circle'];
-
-            if (dataItem.isSelected()) {
-              classes.push('selected');
-            }
-            else if (scope.selectedItems.length > 0) {
-              classes.push('faded');
-            }
-
-            return classes.join(' ');
-          };
-
-
           scope.render = function () {
             var numericProperties = scope.selectedNumericProperties;
 
@@ -95,13 +80,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
             var currentBrush = null;
 
-            var onCircleClick = function (point) {
-
-              //clear current brush selection, if exists
+            var turnOffBrush = function() {
               if (!_.isNull(brushCell) && !_.isNull(currentBrush)) {
                 d3.select(brushCell).call( currentBrush.clear() );
               }
+            }
 
+            var onCircleClick = function (point) {
               var ctrlKey = d3.event.ctrlKey;
 
               if (ctrlKey) {
@@ -115,6 +100,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 _.each(scope.selectedItems, function (item) {
                   item.select(false);
                 });
+
+                turnOffBrush();
 
                 point.select(true);
               }
@@ -204,7 +191,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 var brushStart = function () {
                   if (brushCell !== this) {
                     currentBrush = brush;
-                    d3.select(brushCell).call(brush.clear());
+                    turnOffBrush();
                     brushCell = this;
                   }
                 };
@@ -258,7 +245,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .transition()
                   .duration(1000)
                   .attr('r', defaultRadius)
-                  .attr('class', getPointClasses)
+                  .attr('class', 'circle')
                   .attr('fill', getColor);
               });
             });
