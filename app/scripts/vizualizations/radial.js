@@ -7,14 +7,16 @@ angular.module('radial', ['dataProvider', 'd3'])
       scope: {},
       link: function (scope, element) {
 
+        scope.selectedItems = [];
+
         scope.subscribe = function(cluster) {
 
           $rootScope.$watch(
             function() {
               return cluster.isSelected();
             },
-            function() {
-              scope.update(cluster);
+            function(isSelected) {
+              scope.updateViz(cluster);
             }
           );
 
@@ -41,7 +43,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         var area = svg.append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-        var radius = Math.min(width, height) / 2;
+        var radius = Math.min(width, height) / 2.1;
 
         var partition = d3.layout.partition()
           .sort(null)
@@ -50,7 +52,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             return d.children;
           })
           .value(function(d){
-            return 1;
+            return d.isSelected() ? 100 : 1;
           });
 
         area
@@ -88,14 +90,28 @@ angular.module('radial', ['dataProvider', 'd3'])
         };
 
 
-        scope.update = function (cluster) {
-          area
-            .selectAll('path')
-            .data([cluster], function(d) {
-              return d.id;
+        scope.updateViz = function (cluster) {
+          var newOpacity = cluster.isSelected() ? 1 : 0.1;
+          newOpacity = scope.selectedItems.length === 0 ? 0.9 : newOpacity;
+
+          scope.arcs
+            .filter(function(d) {
+              return d.id === cluster.id;
             })
-            .style('fill', getColor);
+            //.classed('selected', cluster.isSelected())
+            //.classed('faded', !cluster.isSelected())
+            .transition()
+            .duration(500)
+            .style('opacity', newOpacity)
+            .style('fill', getColor)
+            .style('stroke', cluster.isSelected() ? '#000' : '#fff');
             //.attr('d', arc);
+        };
+
+        scope.onClusterClick = function (d) {
+          d.toggleSelect();
+          $rootScope.$apply();
+          scope.render();
         };
 
         scope.render = function () {
@@ -112,9 +128,14 @@ angular.module('radial', ['dataProvider', 'd3'])
             //.attr('display', function(d) { return d.depth ? null : 'none'; })
             .style('stroke', '#fff')
             .style('fill', getColor)
-//            .transition()
-//            .duration(2000)
+            .attr('class', 'arc')
             .attr('d', arc);
+
+          scope.arcs = area
+            .selectAll('.arc');
+
+          scope.arcs.on('click', scope.onClusterClick);
+
           //specify fisheye
         };
       }
