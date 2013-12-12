@@ -28,16 +28,33 @@ angular.module('trellis', ['dataProvider', 'd3'])
             }, function (selectedItems) {
               scope.selectedItems = selectedItems;
 
-              svg.selectAll('circle')
-                .classed('faded', function(d) {
-                  return scope.selectedItems.length > 0 && !d.isSelected();
-                })
-                .classed('selected', function(d) {
-                  return d.isSelected();
-                });
+              //this loop is made for speed up animation
+              _.each(scope.cells, function (cell) {
 
-              //svg.selectAll('circle')
-                //.attr('class', getPointClasses);
+                if (scope.selectedItems.length === 0) {
+
+                  cell.selectAll('circle')
+                    .classed('faded', false)
+                    .classed('selected', false);
+
+                } else {
+                  cell.selectAll('circle')
+                    .filter(function (d) {
+                      //return _.contains(newlySelectedItems, d);
+                      return d.isSelected();// _.contains(scope.selectedItems, d);
+                    })
+                    .classed('faded', false)
+                    .classed('selected', true);
+
+                  cell.selectAll('circle')
+                    .filter(function (d) {
+                      //return _.contains(deselectedItems, d);
+                      return !d.isSelected();// !_.contains(scope.selectedItems, d);
+                    })
+                    .classed('selected', false)
+                    .classed('faded', true);
+                }
+              });
             });
 
           });
@@ -50,7 +67,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             .append('svg')
             .style('height', height + 'px')
             .style('width', '100%')
-            .attr('preserveAspectRatio','xMinYMin slice');
+            .attr('preserveAspectRatio', 'xMinYMin slice');
 
           //specify same height as width
           //d3.select(element[0]).node().offsetHeight = height;
@@ -80,11 +97,11 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
             var currentBrush = null;
 
-            var turnOffBrush = function() {
+            var turnOffBrush = function () {
               if (!_.isNull(brushCell) && !_.isNull(currentBrush)) {
-                d3.select(brushCell).call( currentBrush.clear() );
+                d3.select(brushCell).call(currentBrush.clear());
               }
-            }
+            };
 
             var onCircleClick = function (point) {
               var ctrlKey = d3.event.ctrlKey;
@@ -138,11 +155,11 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var data = scope.clusterItems;
 
-                var xLimits = d3.extent(data, function(item) {
+                var xLimits = d3.extent(data, function (item) {
                   return item[xProperty];
                 });
 
-                var yLimits = d3.extent(data, function(item) {
+                var yLimits = d3.extent(data, function (item) {
                   return item[yProperty];
                 });
 
@@ -200,9 +217,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   var e = brush.extent();
                   var elementsChanged = false;
 
-                  _.each(scope.clusterItems, function(item) {
+                  _.each(scope.clusterItems, function (item) {
                     var outOfSelection = e[0][0] > item[xProperty] || item[xProperty] > e[1][0] ||
-                                         e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
+                      e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
 
                     if (item.isSelected() === outOfSelection) {
                       elementsChanged = true;
@@ -217,8 +234,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 };
 
                 var brushEnd = function () {
-                  if (brush.empty()){
-                    _.each(scope.clusterItems, function(item) {
+                  if (brush.empty()) {
+                    _.each(scope.clusterItems, function (item) {
                       item.select(false);
                     });
                   }
@@ -233,14 +250,18 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .on('brushend', brushEnd);
 
                 cell.append('g')
-                  .attr('class','area')
+                  .attr('class', 'area')
                   .call(brush);
 
                 var enterData = cell.selectAll('circle').data(scope.clusterItems).enter();
                 enterData
                   .append('circle')
-                  .attr('cx', function(d) { return xScale(d[xProperty]); })
-                  .attr('cy', function(d) { return yScale(d[yProperty]); })
+                  .attr('cx', function (d) {
+                    return xScale(d[xProperty]);
+                  })
+                  .attr('cy', function (d) {
+                    return yScale(d[yProperty]);
+                  })
                   .attr('r', 0)
                   .transition()
                   .duration(1000)
