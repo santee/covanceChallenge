@@ -9,10 +9,12 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         scope.subscribe = function(cluster) {
 
-          $rootScope.$watch(function() {
-            return cluster.isSelected();
-            }, function() {
-              scope.update();
+          $rootScope.$watch(
+            function() {
+              return cluster.isSelected();
+            },
+            function() {
+              scope.update(cluster);
             }
           );
 
@@ -86,11 +88,14 @@ angular.module('radial', ['dataProvider', 'd3'])
         };
 
 
-        scope.update = function () {
+        scope.update = function (cluster) {
           area
             .selectAll('path')
-            .style('fill', getColor)
-            .attr('d', arc);
+            .data([cluster], function(d) {
+              return d.id;
+            })
+            .style('fill', getColor);
+            //.attr('d', arc);
         };
 
         scope.render = function () {
@@ -99,7 +104,9 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           area
             .selectAll('path')
-            .data(nodes)
+            .data(nodes, function(d) {
+              return d.id;
+            })
             .enter()
             .append('path')
             //.attr('display', function(d) { return d.depth ? null : 'none'; })

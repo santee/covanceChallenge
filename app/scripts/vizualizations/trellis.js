@@ -21,39 +21,42 @@ angular.module('trellis', ['dataProvider', 'd3'])
             scope.selectedItems = []; //cached selected items for speed
             scope.render();
 
-            $rootScope.$watchCollection(function () {
-              return _.filter(scope.clusterItems, function (item) {
+            $rootScope.$watch(function () {
+              return scope.selectedItems.length;
+            }, function (selectedItemsCount, oldSelectedItemsCount) {
+              if (selectedItemsCount === 0) {
+                //clean selection
+                scope.circles
+                  .classed('faded', false)
+                  .classed('selected', false);
+              }
+              if (oldSelectedItemsCount === 0) {
+                scope.circles
+                  .filter(function (d) {
+                    return !d.isSelected();
+                  })
+                  .classed('faded', true)
+                  .classed('selected', false);
+              }
+            });
+
+            _.each(scope.clusterItems, function (item) {
+              $rootScope.$watch(function () {
                 return item.isSelected();
-              });
-            }, function (selectedItems) {
-              scope.selectedItems = selectedItems;
+              }, function (isSelected) {
 
-              //this loop is made for speed up animation
-              _.each(scope.cells, function (cell) {
-
-                if (scope.selectedItems.length === 0) {
-
-                  cell.selectAll('circle')
-                    .classed('faded', false)
-                    .classed('selected', false);
-
+                if (isSelected) {
+                  scope.selectedItems.push(item);
                 } else {
-                  cell.selectAll('circle')
-                    .filter(function (d) {
-                      //return _.contains(newlySelectedItems, d);
-                      return d.isSelected();// _.contains(scope.selectedItems, d);
-                    })
-                    .classed('faded', false)
-                    .classed('selected', true);
-
-                  cell.selectAll('circle')
-                    .filter(function (d) {
-                      //return _.contains(deselectedItems, d);
-                      return !d.isSelected();// !_.contains(scope.selectedItems, d);
-                    })
-                    .classed('selected', false)
-                    .classed('faded', true);
+                  scope.selectedItems = _.without(scope.selectedItems, item);
                 }
+
+                scope.circles
+                  .filter(function (d) {
+                    return d === item;
+                  })
+                  .classed('faded', !isSelected)
+                  .classed('selected', isSelected);
               });
             });
 
@@ -271,7 +274,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
             });
 
             //register events
-            svg.selectAll('circle')
+            scope.circles = svg.selectAll('circle');
+
+            scope.circles
               .on('click', onCircleClick)
               .on('mouseover', onCircleMouseOver)
               .on('mouseout', onCircleMouseOut);
