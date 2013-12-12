@@ -8,6 +8,9 @@ angular.module('dataProvider')
       self.id = treeData.id;
       var selected = false;
 
+      self.items = [];
+      //self.nodes = [];
+
       self.items = _.map(treeData.items, function (item) {
         return new ItemViewModel(item, self);
       });
@@ -19,6 +22,8 @@ angular.module('dataProvider')
       self.children = _.map(nonEmptyChildren, function (child) {
         return new ClusterNodeViewModel(child);
       });
+
+      //self.nodes = self.children;
 
       self.getAllItems = function () {
         return _.reduce(self.children, function (memo, child) {

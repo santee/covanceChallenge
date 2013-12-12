@@ -71,7 +71,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           //specify same height as width
           //d3.select(element[0]).node().offsetHeight = height;
-          svg.style('height', height);
 
           var colors = d3.scale.category10();
 
