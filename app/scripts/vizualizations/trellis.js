@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('trellis', ['dataProvider', 'd3'])
-  .directive('d3Trellis', ['$q', '$rootScope', 'd3', 'itemPropertiesSelector', 'clusteredData',
-    function ($q, $rootScope, d3, itemPropertiesSelector, clusteredData) {
+  .directive('d3Trellis', ['$q', '$rootScope', 'd3', 'itemPropertiesSelector', 'itemsSelectionService', 'clusteredData',
+    function ($q, $rootScope, d3, itemPropertiesSelector, itemsSelectionService, clusteredData) {
       return {
         restrict: 'EA',
         scope: {
@@ -18,11 +18,10 @@ angular.module('trellis', ['dataProvider', 'd3'])
             scope.selectedTextProperties = properties.selectedTextProperties;
 
             scope.clusterItems = cluster.getAllItems();
-            scope.selectedItems = []; //cached selected items for speed
             scope.render();
 
             $rootScope.$watch(function () {
-              return scope.selectedItems.length;
+              return itemsSelectionService.selectedItems.length;
             }, function (selectedItemsCount, oldSelectedItemsCount) {
               if (selectedItemsCount === 0) {
                 //clean selection
@@ -46,9 +45,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
               }, function (isSelected) {
 
                 if (isSelected) {
-                  scope.selectedItems.push(item);
+                  itemsSelectionService.selectedItems.push(item);
                 } else {
-                  scope.selectedItems = _.without(scope.selectedItems, item);
+                  itemsSelectionService.selectedItems = _.without(itemsSelectionService.selectedItems, item);
                 }
 
                 scope.circles
@@ -59,7 +58,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .classed('selected', isSelected);
               });
             });
-
           });
 
 
@@ -105,6 +103,15 @@ angular.module('trellis', ['dataProvider', 'd3'])
               }
             };
 
+            $rootScope.$watch(function() {
+              return itemsSelectionService.currentSelector;
+            }, function(newSelectorName) {
+              if (newSelectorName !== itemsSelectionService.Selectors.ITEMS) {
+                turnOffBrush();
+              }
+            });
+
+
             var onCircleClick = function (point) {
               var ctrlKey = d3.event.ctrlKey;
 
@@ -112,11 +119,11 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 //allow multi choice
                 point.toggleSelect();
               }
-              else if (scope.selectedItems.length === 1 && point.isSelected()) {
+              else if (itemsSelectionService.selectedItems.length === 1 && point.isSelected()) {
                 point.toggleSelect();
               }
               else {
-                _.each(scope.selectedItems, function (item) {
+                _.each(itemsSelectionService.selectedItems, function (item) {
                   item.select(false);
                 });
 
@@ -208,11 +215,14 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
 
                 var brushStart = function () {
+                  itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
+
                   if (brushCell !== this) {
                     currentBrush = brush;
                     turnOffBrush();
                     brushCell = this;
                   }
+                  scope.update();
                 };
 
                 var brushMove = function () {

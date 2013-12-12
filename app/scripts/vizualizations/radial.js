@@ -1,13 +1,11 @@
 'use strict';
 
 angular.module('radial', ['dataProvider', 'd3'])
-  .directive('d3Radial', ['d3','clusteredData','$rootScope', function (d3, clusteredData, $rootScope) {
+  .directive('d3Radial', ['d3','clusteredData','$rootScope', 'itemsSelectionService', function (d3, clusteredData, $rootScope, itemsSelectionService) {
     return {
       restrict: 'EA',
       scope: {},
       link: function (scope, element) {
-
-        scope.selectedItems = [];
 
         scope.subscribe = function(cluster) {
 
@@ -15,7 +13,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             function() {
               return cluster.isSelected();
             },
-            function(isSelected) {
+            function() {
               scope.updateViz(cluster);
             }
           );
@@ -30,6 +28,7 @@ angular.module('radial', ['dataProvider', 'd3'])
           scope.cluster = cluster;
           scope.render();
           scope.subscribe(cluster);
+
         });
 
         var width = d3.select(element[0]).node().offsetWidth;
@@ -91,8 +90,8 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 
         scope.updateViz = function (cluster) {
-          var newOpacity = cluster.isSelected() ? 1 : 0.1;
-          newOpacity = scope.selectedItems.length === 0 ? 0.9 : newOpacity;
+          var newOpacity = cluster.isSelected() ? 1 : 0.9;
+          //newOpacity = itemsSelectionService.selectedItems.length === 0 && itemsSelectionService.selectedCluster === null ? 0.1 : newOpacity;
 
           scope.arcs
             .filter(function(d) {
@@ -109,7 +108,8 @@ angular.module('radial', ['dataProvider', 'd3'])
         };
 
         scope.onClusterClick = function (d) {
-          d.toggleSelect();
+
+          itemsSelectionService.toggleClusterSelection(d);
           $rootScope.$apply();
           scope.render();
         };

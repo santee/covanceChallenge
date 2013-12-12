@@ -9,8 +9,9 @@ angular.module('dataProvider')
       var selected = false;
 
       self.parent = null;
-      if (!_.isUndefined(parent))
+      if (!_.isUndefined(parent)) {
         self.parent = parent;
+      }
 
       self.items = [];
       //self.nodes = [];
