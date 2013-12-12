@@ -3,10 +3,14 @@
 angular.module('dataProvider')
   .factory('ClusterNode', ['ItemViewModel', '$log', function (ItemViewModel, $log) {
 
-    function ClusterNodeViewModel(treeData) {
+    function ClusterNodeViewModel(treeData, parent) {
       var self = this;
       self.id = treeData.id;
       var selected = false;
+
+      self.parent = null;
+      if (!_.isUndefined(parent))
+        self.parent = parent;
 
       self.items = [];
       //self.nodes = [];
@@ -20,7 +24,7 @@ angular.module('dataProvider')
       });
 
       self.children = _.map(nonEmptyChildren, function (child) {
-        return new ClusterNodeViewModel(child);
+        return new ClusterNodeViewModel(child, self);
       });
 
       //self.nodes = self.children;

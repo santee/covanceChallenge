@@ -1,15 +1,31 @@
 'use strict';
 
 angular.module('radial', ['dataProvider', 'd3'])
-  .directive('d3Radial', ['d3','clusteredData', function (d3, clusteredData) {
+  .directive('d3Radial', ['d3','clusteredData','$rootScope', function (d3, clusteredData, $rootScope) {
     return {
       restrict: 'EA',
       scope: {},
       link: function (scope, element) {
 
+        scope.subscribe = function(cluster) {
+
+          $rootScope.$watch(function() {
+            return cluster.isSelected();
+            }, function() {
+              scope.update();
+            }
+          );
+
+          _.each(cluster.children, function(child){
+            scope.subscribe(child);
+          });
+        };
+
+
         clusteredData.then(function (cluster) {
           scope.cluster = cluster;
           scope.render();
+          scope.subscribe(cluster);
         });
 
         var width = d3.select(element[0]).node().offsetWidth;
@@ -25,92 +41,74 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         var radius = Math.min(width, height) / 2;
 
-        scope.render = function () {
-          var partition = d3.layout.partition()
-            .sort(null)
-            .size([2 * Math.PI, radius * radius])
-            .children( function(d) {
-              return d.children;
-            })
-            .value(function(d){
-              return 1;
-            });
+        var partition = d3.layout.partition()
+          .sort(null)
+          .size([2 * Math.PI, radius * radius])
+          .children( function(d) {
+            return d.children;
+          })
+          .value(function(d){
+            return 1;
+          });
 
-          var arc = d3.svg.arc()
-            .startAngle(function(d) { return d.x; })
-            .endAngle(function(d) { return d.x + d.dx; })
-            .innerRadius(function(d) { return Math.sqrt(d.y); })
-            .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+        area
+          .selectAll('path')
+          .on('mouseover', function() {
+            scope.update();
+          });
 
-          var color = d3.scale.category20c();
+        var arc = d3.svg.arc()
+          .startAngle(function(d) { return d.x; })
+          .endAngle(function(d) { return d.x + d.dx; })
+          .innerRadius(function(d) { return Math.sqrt(d.y); })
+          .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-          //var colorBrewer = d3.interpolateLab('red', 'blue');
-          //var color = colorBrewer(0.5);
+        var color = d3.scale.category20b();
 
-          var path = area.datum(scope.cluster)
+        //var colorBrewer = d3.interpolateLab('red', 'blue');
+        //var color = colorBrewer(0.5);
+
+        var getColor = function(item) {
+
+          if (item.isSelected()) {
+            return 'yellow';
+          }
+
+          var id = item.id;
+
+          var elem = item;
+          while (elem.parent !== null && elem.parent.children[0].id === elem.id) {
+            id = elem.parent.id;
+            elem = elem.parent;
+          }
+
+          return color(id);
+        };
+
+
+        scope.update = function () {
+          area
             .selectAll('path')
-            .data(partition.nodes)
+            .style('fill', getColor)
+            .attr('d', arc);
+        };
+
+        scope.render = function () {
+
+          var nodes = partition.nodes(scope.cluster);
+
+          area
+            .selectAll('path')
+            .data(nodes)
             .enter()
             .append('path')
-            .attr('display', function(d) { return d.depth ? null : 'none'; })
+            //.attr('display', function(d) { return d.depth ? null : 'none'; })
             .style('stroke', '#fff')
-            .style('fill', function(d) {
-              return color ((d.children ? d : d.parent).id );
-            })
-            .style('fill-rule', 'evenodd')
+            .style('fill', getColor)
 //            .transition()
 //            .duration(2000)
             .attr('d', arc);
-
-
           //specify fisheye
-
-          var fisheye = d3.fisheye.circular()
-            .radius(radius / 4)
-            .distortion(2);
-
-          area.on('mousemove', function(){
-            fisheye.focus(d3.mouse(this));
-
-            var nodes = partition.nodes(scope.cluster);
-//
-
-            path
-              .each(function(d) {
-                d.fisheye = fisheye(d);
-              })
-              .attr('d', function(d) {
-                var arc = d3.svg.arc()
-                  .startAngle(function() {
-                    return d.fisheye.x;
-                  })
-                  .endAngle(function() {
-                    return d.fisheye.x + d.dx;
-                  })
-                  .innerRadius(function() {
-                    return Math.sqrt(d.y);
-                  })
-                  .outerRadius(function() {
-                    return Math.sqrt(d.y + d.dy);
-                  });
-
-                return arc();
-              });
-
-//            nodes.each( function(d) {
-//              d.fisheye = fisheye(d);
-//              d.x = fisheye
-//            })
-//
-//            _.each(nodes, function(node) {
-//              node.x = fisheye.x;
-//              node.x = fisheye.x;
-//            });
-//
-//            var links = partition.links(nodes);
-
-          });
-
         };
       }
     };
