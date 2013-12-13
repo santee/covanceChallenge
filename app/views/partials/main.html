@@ -20,7 +20,7 @@
             <p>{{commonTextProperties.length}}</p>
             <p>{{commonNumericProperties.length}}</p>
             <ul ng-repeat="item in allItems">
-                <li ng-class="{selected: item.isSelected()}" ng-click="item.toggleSelect()">{{item.isSelected()}}</li>
+                <li ng-class="{selected: item.isSelected()}" ng-click="itemClick(item)">{{item.isSelected()}}</li>
             </ul>
 
         </div>
