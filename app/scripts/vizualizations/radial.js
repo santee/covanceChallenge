@@ -42,7 +42,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         var area = svg.append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-        var radius = Math.min(width, height) / 2.1;
+        var radius = Math.min(width, height) / 2.2;
 
         var partition = d3.layout.partition()
           .sort(null)
@@ -51,7 +51,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             return d.children;
           })
           .value(function(d){
-            return d.isSelected() ? 100 : 1;
+            return 1;
           });
 
         area
@@ -60,11 +60,28 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.update();
           });
 
+        var findMaxDepth = function(cluster, currentDepth) {
+          currentDepth = currentDepth || 1;
+          var depth = currentDepth;
+          _.each(cluster.children, function(child) {
+            var childDepth = findMaxDepth(child, currentDepth + 1);
+            if (childDepth > depth) {
+              depth = childDepth;
+            }
+          });
+
+          return depth;
+        };
+
         var arc = d3.svg.arc()
           .startAngle(function(d) { return d.x; })
           .endAngle(function(d) { return d.x + d.dx; })
-          .innerRadius(function(d) { return Math.sqrt(d.y); })
-          .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+          .innerRadius(function(d) {
+            return Math.sqrt(d.y * (d.depth + 1) / scope.maxDepth);
+          })
+          .outerRadius(function(d) {
+            return Math.sqrt( (d.y + d.dy) * (d.depth + 2) / scope.maxDepth ) ;
+          });
 
         var color = d3.scale.category20b();
 
@@ -111,21 +128,35 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           itemsSelectionService.toggleClusterSelection(d);
           $rootScope.$apply();
-          scope.render();
+          scope.repaint();
+        };
+
+        scope.repaint = function() {
+
+          var nodes = partition.value(function (d) {
+            return d.isSelected() ? 4 : 1;
+          }).nodes;
+
+
+          scope.arcs
+            .data(nodes)
+            .attr('d', arc);
+
         };
 
         scope.render = function () {
 
-          var nodes = partition.nodes(scope.cluster);
+          scope.maxDepth = findMaxDepth(scope.cluster);
 
           area
+            .datum(scope.cluster)
             .selectAll('path')
-            .data(nodes, function(d) {
+            .data(partition.nodes, function(d) {
               return d.id;
             })
             .enter()
             .append('path')
-            //.attr('display', function(d) { return d.depth ? null : 'none'; })
+            //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
             .style('stroke', '#fff')
             .style('fill', getColor)
             .attr('class', 'arc')

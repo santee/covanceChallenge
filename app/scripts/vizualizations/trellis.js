@@ -20,25 +20,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
             scope.clusterItems = cluster.getAllItems();
             scope.render();
 
-            $rootScope.$watch(function () {
-              return itemsSelectionService.selectedItems.length;
-            }, function (selectedItemsCount, oldSelectedItemsCount) {
-              if (selectedItemsCount === 0) {
-                //clean selection
-                scope.circles
-                  .classed('faded', false)
-                  .classed('selected', false);
-              }
-              if (oldSelectedItemsCount === 0) {
-                scope.circles
-                  .filter(function (d) {
-                    return !d.isSelected();
-                  })
-                  .classed('faded', true)
-                  .classed('selected', false);
-              }
-            });
-
             _.each(scope.clusterItems, function (item) {
               $rootScope.$watch(function () {
                 return item.isSelected();
@@ -57,6 +38,25 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   .classed('faded', !isSelected)
                   .classed('selected', isSelected);
               });
+            });
+
+            $rootScope.$watch(function () {
+              return itemsSelectionService.selectedItems.length;
+            }, function (selectedItemsCount, oldSelectedItemsCount) {
+              if (selectedItemsCount === 0) {
+                //clean selection
+                scope.circles
+                  .classed('faded', false)
+                  .classed('selected', false);
+              }
+              if (oldSelectedItemsCount === 0) {
+                scope.circles
+                  .filter(function (d) {
+                    return !d.isSelected();
+                  })
+                  .classed('faded', true)
+                  .classed('selected', false);
+              }
             });
           });
 

@@ -54,6 +54,7 @@ angular.module('dataProvider')
 
       if (cluster.isSelected()){
         scope.selectedCluster = cluster;
+        scope.selectedItems = cluster.getAllItems();
       }
 
       scope.currentSelector = scope.Selectors.CLUSTER;
