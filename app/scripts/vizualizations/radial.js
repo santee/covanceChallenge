@@ -7,7 +7,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       scope: {},
       link: function (scope, element) {
 
-        var animationDuration = 1500;
+        var selectionAnimationDuration = 500;
+        var appeareanceAnimationDuration = 2000;
 
         scope.subscribe = function (cluster) {
 
@@ -32,15 +33,14 @@ angular.module('radial', ['dataProvider', 'd3'])
           scope.subscribe(cluster);
 
           $rootScope.$watch(
-            function() {
+            function () {
               return itemsSelectionService.currentSelector;
             },
-            function(currentSelector) {
+            function (currentSelector) {
               if (currentSelector !== itemsSelectionService.Selectors.CLUSTER) {
                 scope.repaint(true);
               }
             }
-
           );
 
         });
@@ -64,7 +64,7 @@ angular.module('radial', ['dataProvider', 'd3'])
           .children(function (d) {
             return d.children;
           })
-          .value(function (d) {
+          .value(function () {
             return 1;
           });
 
@@ -141,7 +141,7 @@ angular.module('radial', ['dataProvider', 'd3'])
               return d.id === cluster.id;
             })
             .transition()
-            .duration(animationDuration);
+            .duration(selectionAnimationDuration);
 
           scope.updateColor(arcs);
         };
@@ -153,6 +153,17 @@ angular.module('radial', ['dataProvider', 'd3'])
           scope.repaint();
         };
 
+        function arcTween(item) {
+          var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 }, item);
+          return function (t) {
+            var interpolated = interpolate(t);
+            item.x0 = interpolated.x;
+            item.dx0 = interpolated.dx;
+            return arc(interpolated);
+          };
+        }
+
+
         scope.repaint = function (returnToOriginal) {
 
           returnToOriginal = returnToOriginal || false;
@@ -161,20 +172,10 @@ angular.module('radial', ['dataProvider', 'd3'])
             return (d.isSelected() && !returnToOriginal) ? 4 : 1;
           }).nodes;
 
-          function arcTween(item) {
-            var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 }, item);
-            return function (t) {
-              var interpolated = interpolate(t);
-              item.x0 = interpolated.x;
-              item.dx0 = interpolated.dx;
-              return arc(interpolated);
-            };
-          }
-
           var arcs = scope.arcs
             .data(nodes)
             .transition()
-            .duration(animationDuration)
+            .duration(selectionAnimationDuration)
             .attrTween('d', arcTween);
 
           scope.updateColor(arcs);
@@ -194,18 +195,30 @@ angular.module('radial', ['dataProvider', 'd3'])
             .append('path')
             //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
             .attr('class', 'arc')
-            .attr('d', arc)
             .style('stroke', '#fff')
             .style('fill', getColor)
+            //.attr('d', arc)
+            //.attr('d', initialArc)
             .each(function (d) {
               //preserve values for transition
-              d.x0 = d.x;
-              d.dx0 = d.dx;
+              d.x0 = d.x * 0.1;
+              d.dx0 = d.dx * 0.4;
             });
 
 
           scope.arcs = area
             .selectAll('.arc');
+
+          setTimeout(function(){
+
+            scope
+              .arcs
+              .transition()
+              .duration(appeareanceAnimationDuration)
+              .ease('linear')
+              .attrTween('d', arcTween);
+          }, 100);
+
 
           scope.arcs.on('click', scope.onClusterClick);
 
