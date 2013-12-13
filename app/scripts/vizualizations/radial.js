@@ -129,10 +129,10 @@ angular.module('radial', ['dataProvider', 'd3'])
             .style('opacity', function (d) {
               return d.isSelected() ? 1 : 0.9;
             })
-            .style('fill', getColor)
-            .style('stroke', function (d) {
-              return d.isSelected() ? '#000' : '#fff';
-            });
+            .style('fill', getColor);
+            //.style('stroke', function (d) {
+             // return d.isSelected() ? '#888' : '#888';
+          //  });
         };
 
         scope.updateViz = function (cluster) {
@@ -195,7 +195,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             .append('path')
             //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
             .attr('class', 'arc')
-            .style('stroke', '#fff')
+            .style('stroke', '#888')
             .style('fill', getColor)
             //.attr('d', arc)
             //.attr('d', initialArc)
