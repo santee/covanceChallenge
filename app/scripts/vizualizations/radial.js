@@ -7,6 +7,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       scope: {},
       link: function (scope, element) {
 
+        var animationDuration = 1500;
+
         scope.subscribe = function (cluster) {
 
           $rootScope.$watch(
@@ -139,7 +141,7 @@ angular.module('radial', ['dataProvider', 'd3'])
               return d.id === cluster.id;
             })
             .transition()
-            .duration(500);
+            .duration(animationDuration);
 
           scope.updateColor(arcs);
         };
@@ -172,18 +174,10 @@ angular.module('radial', ['dataProvider', 'd3'])
           var arcs = scope.arcs
             .data(nodes)
             .transition()
-            .duration(1500)
+            .duration(animationDuration)
             .attrTween('d', arcTween);
 
           scope.updateColor(arcs);
-
-//            .style('opacity', function (d) {
-//              return d.isSelected() ? 1 : 0.9;
-//            })
-//            .style('fill', getColor)
-//            .style('stroke', function (d) {
-//              return d.isSelected() ? '#000' : '#fff';
-//            });
         };
 
         scope.render = function () {
