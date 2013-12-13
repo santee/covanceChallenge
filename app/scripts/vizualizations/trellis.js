@@ -113,6 +113,14 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
 
             var onCircleClick = function (point) {
+
+              var oldSelector = itemsSelectionService.currentSelector;
+              itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
+
+              if (oldSelector !== itemsSelectionService.currentSelector) {
+                scope.update();
+              }
+
               var ctrlKey = d3.event.ctrlKey;
 
               if (ctrlKey) {
