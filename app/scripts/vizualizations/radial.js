@@ -10,6 +10,9 @@ angular.module('radial', ['dataProvider', 'd3'])
         var selectionAnimationDuration = 500;
         var appeareanceAnimationDuration = 2000;
 
+        var displayDepth = 5;
+        var useAnimation = true;
+
         scope.subscribe = function (cluster) {
 
           $rootScope.$watch(
@@ -21,29 +24,10 @@ angular.module('radial', ['dataProvider', 'd3'])
             }
           );
 
-          _.each(cluster.children, function (child) {
+          _.each(cluster.nodes, function (child) {
             scope.subscribe(child);
           });
         };
-
-
-        clusteredData.then(function (cluster) {
-          scope.cluster = cluster;
-          scope.render();
-          scope.subscribe(cluster);
-
-          $rootScope.$watch(
-            function () {
-              return itemsSelectionService.currentSelector;
-            },
-            function (currentSelector) {
-              if (currentSelector !== itemsSelectionService.Selectors.CLUSTER) {
-                scope.repaint(true);
-              }
-            }
-          );
-
-        });
 
         var width = d3.select(element[0]).node().offsetWidth;
         var height = width;
@@ -58,26 +42,10 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         var radius = Math.min(width, height) / 2.2;
 
-        var partition = d3.layout.partition()
-          .sort(null)
-          .size([2 * Math.PI, radius * radius])
-          .children(function (d) {
-            return d.children;
-          })
-          .value(function () {
-            return 1;
-          });
-
-        area
-          .selectAll('path')
-          .on('mouseover', function () {
-            scope.update();
-          });
-
         var findMaxDepth = function (cluster, currentDepth) {
           currentDepth = currentDepth || 1;
           var depth = currentDepth;
-          _.each(cluster.children, function (child) {
+          _.each(cluster.nodes, function (child) {
             var childDepth = findMaxDepth(child, currentDepth + 1);
             if (childDepth > depth) {
               depth = childDepth;
@@ -86,6 +54,35 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           return depth;
         };
+
+//        var maxDepth = findMaxDepth(scope.cluster);
+
+        var partition = d3.layout.partition()
+          .sort(null)
+          .size([2 * Math.PI, radius * radius])
+          .children(function (d) {
+
+            if (d.nodeDepth > displayDepth) {
+              return [];
+            }
+
+            return d.nodes;
+          })
+          .value(function (d) {
+            if (d.isSelected()){
+              return 4;
+            }
+
+            return 1;
+
+            return  d.nodeDepth > displayDepth ? 0 : 1;
+          });
+
+        area
+          .selectAll('path')
+          .on('mouseover', function () {
+            scope.update();
+          });
 
         var arc = d3.svg.arc()
           .startAngle(function (d) {
@@ -115,7 +112,7 @@ angular.module('radial', ['dataProvider', 'd3'])
           var id = item.id;
 
           var elem = item;
-          while (elem.parent !== null && elem.parent.children[0].id === elem.id) {
+          while (elem.parent !== null && elem.parent.nodes[0].id === elem.id) {
             id = elem.parent.id;
             elem = elem.parent;
           }
@@ -168,9 +165,10 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           returnToOriginal = returnToOriginal || false;
 
-          var nodes = partition.value(function (d) {
-            return (d.isSelected() && !returnToOriginal) ? 4 : 1;
-          }).nodes;
+//          var nodes = partition.value(function (d) {
+//            return (d.isSelected() && !returnToOriginal) ? 4 : 1;
+//          }).nodes;
+          var nodes = partition.nodes;
 
           var arcs = scope.arcs
             .data(nodes)
@@ -222,6 +220,25 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           scope.arcs.on('click', scope.onClusterClick);
         };
+
+        clusteredData.then(function (cluster) {
+          scope.cluster = cluster;
+          scope.render();
+          scope.subscribe(cluster);
+
+          $rootScope.$watch(
+            function () {
+              return itemsSelectionService.currentSelector;
+            },
+            function (currentSelector) {
+              if (currentSelector !== itemsSelectionService.Selectors.CLUSTER) {
+                scope.repaint(true);
+              }
+            }
+          );
+
+        });
+
       }
     };
   }]);

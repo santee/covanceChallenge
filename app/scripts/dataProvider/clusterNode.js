@@ -8,9 +8,11 @@ angular.module('dataProvider')
       self.id = treeData.id;
       var selected = false;
 
+      self.nodeDepth = 0;
       self.parent = null;
       if (!_.isUndefined(parent)) {
         self.parent = parent;
+        self.nodeDepth = parent.nodeDepth + 1;
       }
 
       self.items = [];
@@ -24,14 +26,16 @@ angular.module('dataProvider')
         return child.items !== 0 || child.children !== 0;
       });
 
-      self.children = _.map(nonEmptyChildren, function (child) {
+
+      //i have to rename it from children because d3 changes 'children' property :-\
+      self.nodes = _.map(nonEmptyChildren, function (child) {
         return new ClusterNodeViewModel(child, self);
       });
 
       //self.nodes = self.children;
 
       self.getAllItems = function () {
-        return _.reduce(self.children, function (memo, child) {
+        return _.reduce(self.nodes, function (memo, child) {
           return _.union(memo, child.getAllItems());
         }, self.items);
       };
@@ -48,7 +52,7 @@ angular.module('dataProvider')
 
         selected = value;
 
-        _.each(self.children, function (child) {
+        _.each(self.nodes, function (child) {
           child.select(value);
         });
       };
