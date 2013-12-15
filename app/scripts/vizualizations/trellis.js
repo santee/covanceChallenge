@@ -154,7 +154,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var colors = d3.scale.category10();
 
-          var defaultRadius = 3;
+          var defaultRadius = 2;
 
           var getColor = function (dataItem) {
             var textProperties = scope.selectedTextProperties;
