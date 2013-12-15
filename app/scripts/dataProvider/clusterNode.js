@@ -42,9 +42,9 @@ angular.module('dataProvider')
 
       self.select = function (value) {
 
-        if (selected !== value) {
-          $log.info('Cluster ' + self.id + ' selection status change to: ' + value);
-        }
+//        if (selected !== value) {
+//          $log.info('Cluster ' + self.id + ' selection status change to: ' + value);
+//        }
 
         selected = value;
 

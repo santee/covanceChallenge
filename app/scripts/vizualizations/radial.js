@@ -221,8 +221,6 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 
           scope.arcs.on('click', scope.onClusterClick);
-
-          //specify fisheye
         };
       }
     };
