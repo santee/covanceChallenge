@@ -52,43 +52,10 @@ canvas, svg {
 
 /*TRELLIS styling*/
 
-.circle {
-    opacity: 0.5;
-}
-
-circle.selected {
-    /*fill: black;*/
-    opacity: 1;
-}
-
-circle.faded {
-    fill: lightgrey;
-    opacity: 0.5;
-}
-
-circle.hover {
-    opacity: 1;
-    cursor: pointer;
-}
-
 rect.extent {
     fill: #000;
     fill-opacity: .125;
     stroke: #fff;
-}
-
-path.arcs {
-    stroke: #fff;
-}
-
-path.selected {
-    opacity: 1;
-    fill: 'yellow';
-    stroke: #000;
-}
-
-path.faded {
-    opacity: 0.5;
 }
 
 /*.circle:hover {*/

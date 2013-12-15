@@ -24,6 +24,7 @@ angular.module('dataProvider')
 
     scope.raiseClusterSelectionChanged = function(cluster) {
       clusterSelectedEvent.cluster = cluster;
+      clusterSelectedEvent.selector = scope.currentSelector;
       document.dispatchEvent(clusterSelectedEvent);
     };
 
@@ -35,9 +36,14 @@ angular.module('dataProvider')
       function(newSelector) {
         if (newSelector !== scope.Selectors.CLUSTER && scope.selectedCluster !== null) {
           scope.selectedCluster.select(false);
+          scope.selectedCluster = null;
         }
       }
     );
+
+    scope.hasSelectedCluster = function() {
+      return scope.selectedCluster !== null;
+    };
 
     scope.toggleClusterSelection = function(cluster) {
 
@@ -54,6 +60,8 @@ angular.module('dataProvider')
 
       if (cluster.isSelected()){
         scope.selectedCluster = cluster;
+      } else {
+        scope.selectedCluster = null;
       }
 
       scope.currentSelector = scope.Selectors.CLUSTER;

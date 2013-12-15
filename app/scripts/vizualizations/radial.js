@@ -12,11 +12,20 @@ angular.module('radial', ['dataProvider', 'd3'])
         var selectionAnimationDuration = 300;
         var appearanceAnimationDuration = 1200;
 
+        var selectedColor = 'yellow';
+        var selectedStroke = '#666';
+        var defaultStroke = '#888';
+        var colorScale = d3.scale.category20b();
+        var unselectedOpacity = 0.5;
+        var selectionValueModifier = 4;
+
         //var useAnimation = true;
         scope.cluster = null;
 
         itemsSelectionService.onClusterSelectionChanged(function(e) {
-          scope.updateViz(e.cluster);
+          if (e.cluster.items.length !== 0) {
+            scope.repaintLeaf(e.cluster);
+          }
         });
 
 
@@ -33,22 +42,27 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         var radius = Math.min(width, height) / 2.2;
 
+        var partitionChildren = function (d) {
+
+          if (d.nodeDepth >= scope.displayDepth) {
+            return [];
+          }
+
+          return d.nodes;
+        };
+
+        var partitionValue = function (d) {
+          if (d.isSelected()){
+            return selectionValueModifier;
+          }
+          return 1;
+        };
+
         var partition = d3.layout.partition()
           .sort(null)
           .size([2 * Math.PI, radius * radius])
-          .children(function (d) {
-
-            if (d.nodeDepth >= scope.displayDepth) {
-              return [];
-            }
-            return d.nodes;
-          })
-          .value(function (d) {
-            if (d.isSelected()){
-              return 4;
-            }
-            return 1;
-          });
+          .children(partitionChildren)
+          .value(partitionValue);
 
         area
           .selectAll('path')
@@ -67,10 +81,8 @@ angular.module('radial', ['dataProvider', 'd3'])
             return Math.sqrt(d.y * (d.nodeDepth) / (scope.displayDepth + 1) );
           })
           .outerRadius(function (d) {
-            return Math.sqrt((d.y + d.dy) * (d.nodeDepth + 1) / (scope.displayDepth + 1));
+            return Math.sqrt((d.y + d.dy) * ( d.nodeDepth + 1) / (scope.displayDepth + 1));
           });
-
-        var color = d3.scale.category20b();
 
         //var colorBrewer = d3.interpolateLab('red', 'blue');
         //var color = colorBrewer(0.5);
@@ -78,7 +90,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         var getColor = function (item) {
 
           if (item.isSelected()) {
-            return 'yellow';
+            return selectedColor;
           }
 
           var id = item.id;
@@ -89,19 +101,27 @@ angular.module('radial', ['dataProvider', 'd3'])
             elem = elem.parent;
           }
 
-          return color(id);
+          return colorScale(id);
         };
 
 
-        scope.updateColor = function (arcs) {
+        scope.updateStyle = function (arcs) {
+
+          var hasSelectedCluster = itemsSelectionService.selectedCluster !== null;
+
           arcs
             .style('opacity', function (d) {
-              return d.isSelected() ? 1 : 0.9;
+              if (!hasSelectedCluster) {
+                return 1;
+              }
+              return d.isSelected() ? 1 : unselectedOpacity;
             })
-            .style('fill', getColor);
+            .style('fill', getColor)
+            .style('stroke', function(d) { return d.isSelected() ? selectedStroke : defaultStroke; });
         };
 
-        scope.updateViz = function (cluster) {
+        //repaints only one leaf, with opacity / color change
+        scope.repaintLeaf = function (cluster) {
           var arcs = scope.arcs
             .filter(function (d) {
               return d.id === cluster.id;
@@ -109,39 +129,41 @@ angular.module('radial', ['dataProvider', 'd3'])
             .transition()
             .duration(selectionAnimationDuration);
 
-          scope.updateColor(arcs);
+          scope.updateStyle(arcs);
         };
-
-        scope.onClusterClick = function (d) {
-
-          itemsSelectionService.toggleClusterSelection(d);
-          $rootScope.$apply();
-          scope.repaint();
-        };
-
-        function arcTween(item) {
-          var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 }, item);
-          return function (t) {
-            var interpolated = interpolate(t);
-            item.x0 = interpolated.x;
-            item.dx0 = interpolated.dx;
-            return arc(interpolated);
-          };
-        }
-
 
         scope.repaint = function () {
-
           var nodes = partition.nodes;
-
           var arcs = scope.arcs
             .data(nodes)
             .transition()
             .duration(selectionAnimationDuration)
             .attrTween('d', arcTween);
 
-          scope.updateColor(arcs);
+          //if (itemsSelectionService.hasSelectedCluster())
+//            arcs.attrTween('d', arcTween);
+
+          scope.updateStyle(arcs);
         };
+
+        scope.onClusterClick = function (d) {
+
+          itemsSelectionService.toggleClusterSelection(d);
+          scope.repaint();
+          $rootScope.$apply();
+        };
+
+        function arcTween(item) {
+          var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0, y: item.y0, dy: item.dy0 }, item);
+          return function (t) {
+            var interpolated = interpolate(t);
+            item.x0 = interpolated.x;
+            item.dx0 = interpolated.dx;
+            item.y0 = interpolated.y;
+            item.dy0 = interpolated.dy;
+            return arc(interpolated);
+          };
+        }
 
         scope.render = function () {
 
@@ -157,14 +179,14 @@ angular.module('radial', ['dataProvider', 'd3'])
             .append('path')
             //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
             .attr('class', 'arc')
-            .style('stroke', '#888')
-            .style('fill', getColor)
             //.attr('d', arc)
             //.attr('d', initialArc)
             .each(function (d) {
               //preserve values for transition
               d.x0 = d.x * 0.1;
               d.dx0 = d.dx * 0.4;
+              d.y0 = d.y;
+              d.dy0 = d.dy * 0.4;
             });
 
           data
@@ -176,13 +198,15 @@ angular.module('radial', ['dataProvider', 'd3'])
             .selectAll('.arc');
 
           setTimeout(function(){
-
             scope
               .arcs
               .transition()
               .duration(appearanceAnimationDuration)
               .ease('linear')
               .attrTween('d', arcTween);
+
+            scope.updateStyle(scope.arcs);
+
           }, 100);
 
 

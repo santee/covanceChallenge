@@ -40,6 +40,17 @@ angular.module('dataProvider')
         }
       };
 
+      self.hasSelectedChildren = function() {
+        var res = self.isSelected();
+
+        _.each(self.nodes, function(child) {
+          res = res || child.hasSelectedChildren();
+        });
+
+        return res;
+
+      };
+
       self.getAllItems = function () {
         return _.reduce(self.nodes, function (memo, child) {
           return _.union(memo, child.getAllItems());
