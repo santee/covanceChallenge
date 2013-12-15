@@ -58,6 +58,14 @@ rect.extent {
     stroke: #fff;
 }
 
+.infoBox {
+    visibility: visible;
+}
+
+.infoBox.hidden {
+    visibility: hidden;
+}
+
 /*.circle:hover {*/
     /*opacity: 1;*/
     /*cursor: pointer;*/
