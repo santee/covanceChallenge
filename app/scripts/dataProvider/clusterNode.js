@@ -68,6 +68,22 @@ angular.module('dataProvider')
       };
 
 
+      //finds maximum depth in current branch (not in the whole tree)
+      self.findMaxDepth = function () {
+
+        var maxDepth = self.nodeDepth;
+
+        _.each(self.nodes, function (child) {
+          var maxChildDepth = child.findMaxDepth();
+          if (maxChildDepth > maxDepth) {
+            maxDepth = maxChildDepth;
+          }
+        });
+
+        return maxDepth;
+      };
+
+
       var itemsCommonProperties = function (selector) {
 
         var allItemsProperties = _.map(self.getAllItems(), selector);

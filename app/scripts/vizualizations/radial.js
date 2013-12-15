@@ -10,17 +10,10 @@ angular.module('radial', ['dataProvider', 'd3'])
       link: function (scope, element) {
 
         var selectionAnimationDuration = 300;
-        var appeareanceAnimationDuration = 1200;
+        var appearanceAnimationDuration = 1200;
 
         //var useAnimation = true;
         scope.cluster = null;
-
-        $rootScope.$watch(function() { return scope.displayDepth;}, function() {
-          if (scope.cluster !== null) {
-            scope.render();
-          }
-        });
-
 
         itemsSelectionService.onClusterSelectionChanged(function(e) {
           scope.updateViz(e.cluster);
@@ -40,19 +33,6 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         var radius = Math.min(width, height) / 2.2;
 
-        var findMaxDepth = function (cluster, currentDepth) {
-          currentDepth = currentDepth || 1;
-          var depth = currentDepth;
-          _.each(cluster.nodes, function (child) {
-            var childDepth = findMaxDepth(child, currentDepth + 1);
-            if (childDepth > depth) {
-              depth = childDepth;
-            }
-          });
-
-          return depth;
-        };
-
         var partition = d3.layout.partition()
           .sort(null)
           .size([2 * Math.PI, radius * radius])
@@ -61,14 +41,12 @@ angular.module('radial', ['dataProvider', 'd3'])
             if (d.nodeDepth >= scope.displayDepth) {
               return [];
             }
-
             return d.nodes;
           })
           .value(function (d) {
             if (d.isSelected()){
               return 4;
             }
-
             return 1;
           });
 
@@ -152,9 +130,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         }
 
 
-        scope.repaint = function (returnToOriginal) {
-
-          returnToOriginal = returnToOriginal || false;
+        scope.repaint = function () {
 
           var nodes = partition.nodes;
 
@@ -168,8 +144,6 @@ angular.module('radial', ['dataProvider', 'd3'])
         };
 
         scope.render = function () {
-
-          scope.maxDepth = findMaxDepth(scope.cluster);
 
           var data = area
             .datum(scope.cluster)
@@ -193,7 +167,6 @@ angular.module('radial', ['dataProvider', 'd3'])
               d.dx0 = d.dx * 0.4;
             });
 
-
           data
             .exit()
             .remove();
@@ -207,7 +180,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope
               .arcs
               .transition()
-              .duration(appeareanceAnimationDuration)
+              .duration(appearanceAnimationDuration)
               .ease('linear')
               .attrTween('d', arcTween);
           }, 100);
@@ -218,8 +191,13 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         clusteredData.then(function (cluster) {
           scope.cluster = cluster;
+          scope.maxDepth = scope.cluster.findMaxDepth();
           scope.render();
           //scope.subscribe(cluster);
+
+          $rootScope.$watch(function() { return Math.min( scope.displayDepth, scope.maxDepth); }, function() {
+            scope.render();
+          });
 
           $rootScope.$watch(
             function () {
@@ -227,7 +205,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             },
             function (currentSelector) {
               if (currentSelector !== itemsSelectionService.Selectors.CLUSTER) {
-                scope.repaint(true);
+                scope.repaint();
               }
             }
           );
