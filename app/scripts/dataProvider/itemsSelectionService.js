@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('dataProvider')
-  .service('itemsSelectionService', ['$rootScope', function($rootScope) {
+  .service('itemsSelectionService', ['$rootScope', '$document', function($rootScope) {
 
     var scope = {};
 
@@ -13,6 +13,21 @@ angular.module('dataProvider')
     };
 
     scope.currentSelector = scope.Selectors.CLUSTER;
+
+
+    //see http://www.kaizou.org/2010/03/generating-custom-javascript-events/ for more info
+    var clusterSelectedEvent = document.createEvent('Event');
+    clusterSelectedEvent.initEvent('clusterSelectionChanged', true, true);
+
+    scope.onClusterSelectionChanged = function(callback) {
+      document.addEventListener('clusterSelectionChanged', callback, false);
+    };
+
+    scope.raiseClusterSelectionChanged = function(cluster) {
+      clusterSelectedEvent.cluster = cluster;
+      document.dispatchEvent(clusterSelectedEvent);
+    };
+
 
     $rootScope.$watch(
       function() {

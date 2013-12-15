@@ -11,7 +11,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var elementsToUpdate = [];
 
-          window.requestAnimFrame = (function(){
+          var requestAnimFrame = (function(){
             return window.requestAnimationFrame       ||
               window.webkitRequestAnimationFrame ||
               window.mozRequestAnimationFrame    ||
@@ -21,6 +21,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 window.setTimeout(callback, 1000 / 60);
               };
           })();
+
+
+          var onClusterSelectionChange = function(e) {
+            elementsToUpdate = elementsToUpdate.concat(e.cluster.items);
+          };
+
+          itemsSelectionService.onClusterSelectionChanged(onClusterSelectionChange);
 
           scope.renderPoints = function(data, context) {
             elementsToUpdate = data;
@@ -71,7 +78,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             }
 
             (function animloop() {
-              window.requestAnimFrame(animloop);
+              requestAnimFrame(animloop);
               render();
             })();
           };
@@ -192,50 +199,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
               }
             });
 
-
-            var onCircleClick = function (point) {
-
-              var oldSelector = itemsSelectionService.currentSelector;
-              itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
-
-              if (oldSelector !== itemsSelectionService.currentSelector) {
-                scope.update();
-              }
-
-              var ctrlKey = d3.event.ctrlKey;
-
-              if (ctrlKey) {
-                //allow multi choice
-                point.toggleSelect();
-              }
-              else if (itemsSelectionService.selectedItems.length === 1 && point.isSelected()) {
-                point.toggleSelect();
-              }
-              else {
-                _.each(itemsSelectionService.selectedItems, function (item) {
-                  item.select(false);
-                });
-
-                turnOffBrush();
-
-                point.select(true);
-              }
-
-              scope.update();
-            };
-
-            var onCircleMouseOver = function () {
-              if (!d3.event.shiftKey) {
-                d3.select(this).attr('r', defaultRadius * 2);
-                d3.select(this).classed('hover', true);
-              }
-            };
-
-            var onCircleMouseOut = function () {
-              d3.select(this).attr('r', defaultRadius);
-              d3.select(this).classed('hover', false);
-            };
-
             scope.update = function () {
               $rootScope.$apply();
             };
@@ -329,11 +292,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
                       elementsToUpdate.push(item);
                     }
                   });
-
-//                  if (elementsChanged) {
-//                    scope.update();
-//                  }
-
                 };
 
                 var brushEnd = function () {
@@ -378,11 +336,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
             //register events
             scope.circles = svg.selectAll('circle');
-
-            scope.circles
-              .on('click', onCircleClick)
-              .on('mouseover', onCircleMouseOver)
-              .on('mouseout', onCircleMouseOut);
 
           };
         }
