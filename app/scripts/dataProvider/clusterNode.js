@@ -32,7 +32,13 @@ angular.module('dataProvider')
         return new ClusterNodeViewModel(child, self);
       });
 
-      //self.nodes = self.children;
+      self.getRoot = function() {
+        if (self.parent === null) {
+          return self;
+        } else {
+          return self.parent.getRoot();
+        }
+      };
 
       self.getAllItems = function () {
         return _.reduce(self.nodes, function (memo, child) {
@@ -46,12 +52,11 @@ angular.module('dataProvider')
 
       self.select = function (value) {
 
-        if (selected !== value) {
-          itemsSelectionService.raiseClusterSelectionChanged(self);
-//          $log.info('Cluster ' + self.id + ' selection status change to: ' + value);
-        }
-
+        var selectionChanged = selected !== value;
         selected = value;
+        if (selectionChanged) {
+          itemsSelectionService.raiseClusterSelectionChanged(self);
+        }
 
         _.each(self.nodes, function (child) {
           child.select(value);

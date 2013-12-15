@@ -5,7 +5,6 @@ angular.module('dataProvider')
 
     var scope = {};
 
-    scope.selectedItems = [];
     scope.selectedCluster = null;
     scope.Selectors = {
       CLUSTER: 0,
@@ -40,36 +39,21 @@ angular.module('dataProvider')
       }
     );
 
-    scope.deselectAll = function() {
-      _.each(scope.selectedItems, function(item){
-        item.select(false);
-      });
-
-      scope.selectedItems = [];
-
-      if (scope.selectedCluster !== null) {
-        scope.selectedCluster.select(false);
-      }
-
-      scope.selectedCluster = null;
-    };
-
     scope.toggleClusterSelection = function(cluster) {
+
       var newSelectionStatus = !cluster.isSelected();
 
       if (cluster.isSelected() && cluster !== scope.selectedCluster) {
         newSelectionStatus = true;
       }
 
-      scope.deselectAll();
+      //deselect all
+      cluster.getRoot().select(false);
 
-      if (cluster !== scope.selectedCluster) {
-        cluster.select(newSelectionStatus);
-      }
+      cluster.select(newSelectionStatus);
 
       if (cluster.isSelected()){
         scope.selectedCluster = cluster;
-        scope.selectedItems = cluster.getAllItems();
       }
 
       scope.currentSelector = scope.Selectors.CLUSTER;

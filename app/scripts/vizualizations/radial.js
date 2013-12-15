@@ -9,8 +9,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       },
       link: function (scope, element) {
 
-        var selectionAnimationDuration = 500;
-        var appeareanceAnimationDuration = 2000;
+        var selectionAnimationDuration = 300;
+        var appeareanceAnimationDuration = 1200;
 
         //var useAnimation = true;
         scope.cluster = null;
@@ -18,25 +18,14 @@ angular.module('radial', ['dataProvider', 'd3'])
         $rootScope.$watch(function() { return scope.displayDepth;}, function() {
           if (scope.cluster !== null) {
             scope.render();
-            //scope.changeDepth();
           }
         });
 
-        scope.subscribe = function (cluster) {
 
-          $rootScope.$watch(
-            function () {
-              return cluster.isSelected();
-            },
-            function () {
-              scope.updateViz(cluster);
-            }
-          );
+        itemsSelectionService.onClusterSelectionChanged(function(e) {
+          scope.updateViz(e.cluster);
+        });
 
-          _.each(cluster.nodes, function (child) {
-            scope.subscribe(child);
-          });
-        };
 
         var width = d3.select(element[0]).node().offsetWidth;
         var height = width;
@@ -81,8 +70,6 @@ angular.module('radial', ['dataProvider', 'd3'])
             }
 
             return 1;
-
-            //return  d.nodeDepth > scope.displayDepth ? 0 : 1;
           });
 
         area
@@ -134,9 +121,6 @@ angular.module('radial', ['dataProvider', 'd3'])
               return d.isSelected() ? 1 : 0.9;
             })
             .style('fill', getColor);
-            //.style('stroke', function (d) {
-             // return d.isSelected() ? '#888' : '#888';
-          //  });
         };
 
         scope.updateViz = function (cluster) {
@@ -172,9 +156,6 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           returnToOriginal = returnToOriginal || false;
 
-//          var nodes = partition.value(function (d) {
-//            return (d.isSelected() && !returnToOriginal) ? 4 : 1;
-//          }).nodes;
           var nodes = partition.nodes;
 
           var arcs = scope.arcs
@@ -238,7 +219,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         clusteredData.then(function (cluster) {
           scope.cluster = cluster;
           scope.render();
-          scope.subscribe(cluster);
+          //scope.subscribe(cluster);
 
           $rootScope.$watch(
             function () {

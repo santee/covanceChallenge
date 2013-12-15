@@ -97,44 +97,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
             scope.clusterItems = cluster.getAllItems();
             scope.render();
 
-//            _.each(scope.clusterItems, function (item) {
-//              $rootScope.$watch(function () {
-//                return item.isSelected();
-//              }, function (isSelected) {
-//
-//                if (isSelected) {
-//                  itemsSelectionService.selectedItems.push(item);
-//                } else {
-//                  itemsSelectionService.selectedItems = _.without(itemsSelectionService.selectedItems, item);
-//                }
-//
-//                scope.circles
-//                  .filter(function (d) {
-//                    return d === item;
-//                  })
-//                  .classed('faded', !isSelected)
-//                  .classed('selected', isSelected);
-//              });
-//            });
-
-//            $rootScope.$watch(function () {
-//              return itemsSelectionService.selectedItems.length;
-//            }, function (selectedItemsCount, oldSelectedItemsCount) {
-//              if (selectedItemsCount === 0) {
-//                //clean selection
-//                scope.circles
-//                  .classed('faded', false)
-//                  .classed('selected', false);
-//              }
-//              if (oldSelectedItemsCount === 0) {
-//                scope.circles
-//                  .filter(function (d) {
-//                    return !d.isSelected();
-//                  })
-//                  .classed('faded', true)
-//                  .classed('selected', false);
-//              }
-//            });
           });
 
           var width = d3.select(element[0]).node().offsetWidth;
@@ -280,14 +242,14 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var brushMove = function () {
                   var e = brush.extent();
-                  var elementsChanged = false;
+                  //var elementsChanged = false;
 
                   _.each(scope.clusterItems, function (item) {
                     var outOfSelection = e[0][0] > item[xProperty] || item[xProperty] > e[1][0] ||
                       e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
 
                     if (item.isSelected() === outOfSelection) {
-                      elementsChanged = true;
+                    //  elementsChanged = true;
                       item.select(!outOfSelection);
                       elementsToUpdate.push(item);
                     }
@@ -313,22 +275,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 cell.append('g')
                   .attr('class', 'area')
                   .call(brush);
-
-//                var enterData = cell.selectAll('circle').data(scope.clusterItems).enter();
-//                enterData
-//                  .append('circle')
-//                  .attr('cx', function (d) {
-//                    return xScale(d[xProperty]);
-//                  })
-//                  .attr('cy', function (d) {
-//                    return yScale(d[yProperty]);
-//                  })
-//                  .attr('r', 0)
-//                  .transition()
-//                  .duration(1000)
-//                  .attr('r', defaultRadius)
-//                  .attr('class', 'circle')
-//                  .attr('fill', getColor);
               });
             });
 
