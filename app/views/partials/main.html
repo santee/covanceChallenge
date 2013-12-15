@@ -4,8 +4,11 @@
 
         <h1>Hello world</h1>
 
+        <input id="depthInput" type="number" ng-model="maxDepth"/>
+        <label for="depthInput">Max depth</label>
 
-        <div d3-radial class="radial graphContainer">
+
+        <div d3-radial class="radial graphContainer" data-display-depth="maxDepth">
 
         </div>
 

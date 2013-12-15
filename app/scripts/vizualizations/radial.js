@@ -4,14 +4,23 @@ angular.module('radial', ['dataProvider', 'd3'])
   .directive('d3Radial', ['d3', 'clusteredData', '$rootScope', 'itemsSelectionService', function (d3, clusteredData, $rootScope, itemsSelectionService) {
     return {
       restrict: 'EA',
-      scope: {},
+      scope: {
+        displayDepth : '='
+      },
       link: function (scope, element) {
 
         var selectionAnimationDuration = 500;
         var appeareanceAnimationDuration = 2000;
 
-        var displayDepth = 5;
-        var useAnimation = true;
+        //var useAnimation = true;
+        scope.cluster = null;
+
+        $rootScope.$watch(function() { return scope.displayDepth;}, function() {
+          if (scope.cluster !== null) {
+            scope.render();
+            //scope.changeDepth();
+          }
+        });
 
         scope.subscribe = function (cluster) {
 
@@ -55,14 +64,12 @@ angular.module('radial', ['dataProvider', 'd3'])
           return depth;
         };
 
-//        var maxDepth = findMaxDepth(scope.cluster);
-
         var partition = d3.layout.partition()
           .sort(null)
           .size([2 * Math.PI, radius * radius])
           .children(function (d) {
 
-            if (d.nodeDepth > displayDepth) {
+            if (d.nodeDepth >= scope.displayDepth) {
               return [];
             }
 
@@ -75,7 +82,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
             return 1;
 
-            return  d.nodeDepth > displayDepth ? 0 : 1;
+            //return  d.nodeDepth > scope.displayDepth ? 0 : 1;
           });
 
         area
@@ -92,10 +99,10 @@ angular.module('radial', ['dataProvider', 'd3'])
             return d.x + d.dx;
           })
           .innerRadius(function (d) {
-            return Math.sqrt(d.y * (d.depth + 1) / scope.maxDepth);
+            return Math.sqrt(d.y * (d.nodeDepth) / (scope.displayDepth + 1) );
           })
           .outerRadius(function (d) {
-            return Math.sqrt((d.y + d.dy) * (d.depth + 2) / scope.maxDepth);
+            return Math.sqrt((d.y + d.dy) * (d.nodeDepth + 1) / (scope.displayDepth + 1));
           });
 
         var color = d3.scale.category20b();
@@ -183,12 +190,14 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           scope.maxDepth = findMaxDepth(scope.cluster);
 
-          area
+          var data = area
             .datum(scope.cluster)
             .selectAll('path')
             .data(partition.nodes, function (d) {
               return d.id;
-            })
+            });
+
+          data
             .enter()
             .append('path')
             //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
@@ -202,6 +211,11 @@ angular.module('radial', ['dataProvider', 'd3'])
               d.x0 = d.x * 0.1;
               d.dx0 = d.dx * 0.4;
             });
+
+
+          data
+            .exit()
+            .remove();
 
 
           scope.arcs = area
