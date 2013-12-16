@@ -38,9 +38,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
               elementsToUpdate.forEach(function(d) {
 
                 var fillStyle = getColor(d);
+                var strokeStyle = d3.rgb(fillStyle);
 
                 if (!d.isSelected()) {
                   fillStyle = 'rgba(211,211,211,0.5)';
+                  strokeStyle = 'rgba(' + strokeStyle.r + "," + strokeStyle.g + ',' + strokeStyle.b + ', 0.1)';
+                } else {
+                  strokeStyle = strokeStyle.toString();
                 }
 //                else{
 //                  fillStyle = 'rgba(100,100,100, 1)';
@@ -63,14 +67,19 @@ angular.module('trellis', ['dataProvider', 'd3'])
                       context.arc(x, y, defaultRadius, 2*Math.PI, false);
                       context.fillStyle = 'rgba(255,255,255,1)';
                       context.fill();
+                      context.strokeStyle = 'white';
+                      context.stroke();
 
 //                      context.beginPath();
 //                      context.arc(x, y, defaultRadius, 2*Math.PI, false);
                       context.fillStyle = fillStyle;
                       context.fill();
+                      //context.lineWidth = -0.5;
+                      context.strokeStyle = strokeStyle;
+                      //context.antiAlias(true);
 
                       //context.lineWidth = 0;
-                      //context.stroke();
+                      context.stroke();
                     });
                   });
               });
