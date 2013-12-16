@@ -175,13 +175,13 @@ angular.module('radial', ['dataProvider', 'd3'])
           };
 
           function arcTween(item) {
-            var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0, y: item.y0, dy: item.dy0 }, item);
+            var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 /* y: item.y0, dy: item.dy0*/ }, item);
             return function (t) {
               var interpolated = interpolate(t);
               item.x0 = interpolated.x;
               item.dx0 = interpolated.dx;
-              item.y0 = interpolated.y;
-              item.dy0 = interpolated.dy;
+              //item.y0 = interpolated.y;
+              //item.dy0 = interpolated.dy;
               return arc(interpolated);
             };
           }
@@ -206,8 +206,8 @@ angular.module('radial', ['dataProvider', 'd3'])
                 //preserve values for transition
                 d.x0 = d.x * 0.1;
                 d.dx0 = d.dx * 0.4;
-                d.y0 = d.y;
-                d.dy0 = d.dy * 0.4;
+                //d.y0 = d.y;
+                //d.dy0 = d.dy * 0.4;
               });
 
             data
