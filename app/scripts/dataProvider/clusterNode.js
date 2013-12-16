@@ -57,6 +57,9 @@ angular.module('dataProvider')
         }, self.items);
       };
 
+      var allItems = self.getAllItems();
+      self.totalItemsCount = allItems.length;
+
       self.isSelected = function () {
         return selected;
       };
@@ -120,6 +123,39 @@ angular.module('dataProvider')
           return item.textProperties;
         });
       };
+
+      self.commonNumericProperties = self.getCommonNumericProperties();
+      self.commonTextProperties = self.getCommonTextProperties();
+
+      self.averageNumericValues = {};
+      self.topTextValues = {};
+
+
+
+      _.each(self.commonNumericProperties, function(propertyName) {
+        var sum = _.reduce(allItems, function(memo, item) { return memo + item[propertyName]; }, 0);
+        self.averageNumericValues[propertyName] = sum / allItems.length;
+      });
+
+      _.each(self.commonTextProperties, function(propertyName) {
+        var results = {};
+        var topResult = '';
+        var topResultCount = 0;
+        _.each(allItems, function(item) {
+          var itemValue = item[propertyName];
+          if (!results.hasOwnProperty(itemValue)) {
+            results[itemValue] = 0;
+          }
+
+          results[itemValue]++;
+          if (topResultCount < results[itemValue]) {
+            topResult = itemValue;
+            topResultCount = results[itemValue];
+          }
+        });
+
+        self.topTextValues[propertyName] = topResult;
+      });
     }
 
     return ClusterNodeViewModel;

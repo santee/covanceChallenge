@@ -29,6 +29,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           //var useAnimation = true;
           scope.cluster = null;
+          scope.pointedCluster = null;
 
           itemsSelectionService.onClusterSelectionChanged(function (e) {
             if (e.cluster.items.length !== 0) {
@@ -54,7 +55,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             var box = angular.element(html.data);
             element.append(box);
             $compile(box)(scope);
-            scope.infoBox = box;
+            scope.infoBox.element = box;
             infoBoxDeferred.resolve(box);
           });
 
@@ -174,6 +175,16 @@ angular.module('radial', ['dataProvider', 'd3'])
             $rootScope.$apply();
           };
 
+          scope.onMouseOver = function(d,e) {
+            scope.pointedCluster = d;
+            $rootScope.$apply();
+          };
+
+          scope.onMouseOut = function() {
+            scope.pointedCluster = null;
+            $rootScope.$apply();
+          };
+
           function arcTween(item) {
             var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 /* y: item.y0, dy: item.dy0*/ }, item);
             return function (t) {
@@ -232,6 +243,14 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 
             scope.arcs.on('click', scope.onClusterClick);
+            scope.arcs.on('mouseenter', scope.onMouseOver);
+            scope.arcs.on('mouseleave', scope.onMouseOut);
+            svg.on('mousemove', function(){
+              var coordinates = d3.mouse( this );
+              scope.tooltipX = (coordinates[0] + 50) + 'px';
+              scope.tooltipY = (coordinates[1] + 10) + 'px';
+              $rootScope.$apply();
+            });
           };
 
           $q.all(clusteredData, scope.infoBox.deferred)
