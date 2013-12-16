@@ -4,7 +4,7 @@ public
 .sass-cache
 app/bower_components
 heroku
-views
+/views
 */.idea/**/*.iws
 */.idea/tasks.xml
 */.idea/workspace.xml
