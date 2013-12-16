@@ -18,7 +18,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               window.oRequestAnimationFrame      ||
               window.msRequestAnimationFrame     ||
               function( callback ){
-                window.setTimeout(callback, 1000 / 10);
+                window.setTimeout(callback, 1000 / 1);
               };
           })();
 
@@ -64,13 +64,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
                       context.fillStyle = 'rgba(255,255,255,1)';
                       context.fill();
 
-                      context.beginPath();
-                      context.arc(x, y, defaultRadius, 2*Math.PI, false);
+//                      context.beginPath();
+//                      context.arc(x, y, defaultRadius, 2*Math.PI, false);
                       context.fillStyle = fillStyle;
                       context.fill();
 
-                      context.lineWidth = 0;
-                      context.stroke();
+                      //context.lineWidth = 0;
+                      //context.stroke();
                     });
                   });
               });
