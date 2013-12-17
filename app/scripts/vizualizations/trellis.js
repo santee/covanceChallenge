@@ -32,7 +32,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
           scope.renderPoints = function (data, context) {
             //at first, prerender all possible images to increase performance
 
-            function createCircleImage(color, strokeColor, opacity) {
+            function createCircleImage(color, strokeColor) {
               //canvas2d.fillStyle = 'rgba(255,255,255,0)';
 
               var circle = document.createElement('canvas');
@@ -69,13 +69,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
               var strokeStyle = d3.rgb(color);
 
               if (!selectedCirclesPrerendered.hasOwnProperty(color)) {
-                selectedCirclesPrerendered[color] = createCircleImage(color, strokeStyle.toString(), 1);
+                selectedCirclesPrerendered[color] = createCircleImage(color, strokeStyle.toString());
               }
 
               if (!unselectedCirclesPrerendered.hasOwnProperty(color)) {
                 var fillStyle = 'rgba(211,211,211,0.5)';
                 var transparentStrokeStyle = 'rgba(' + strokeStyle.r + ',' + strokeStyle.g + ',' + strokeStyle.b + ', 0.1)';
-                unselectedCirclesPrerendered[color] = createCircleImage(fillStyle, transparentStrokeStyle, 1);
+                unselectedCirclesPrerendered[color] = createCircleImage(fillStyle, transparentStrokeStyle);
               }
             });
 
