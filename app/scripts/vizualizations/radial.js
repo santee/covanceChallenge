@@ -275,7 +275,7 @@ angular.module('radial', ['dataProvider', 'd3'])
           };
 
           $q.all(clusteredData, scope.infoBox.deferred)
-            .then(function (cluster, infoBox) {
+            .then(function (cluster) {
               scope.cluster = cluster;
               scope.maxDepth = scope.cluster.findMaxDepth();
               scope.render();
