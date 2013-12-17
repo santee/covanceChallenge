@@ -61,7 +61,7 @@ rect.cell {
 rect.extent {
     fill: #000;
     fill-opacity: .125;
-    stroke: #fff;
+    /*stroke: #fff;*/
 }
 
 .infoBox {

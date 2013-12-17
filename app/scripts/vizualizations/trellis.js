@@ -296,6 +296,29 @@ angular.module('trellis', ['dataProvider', 'd3'])
                     .call(yAxis);
                 }
 
+                //specify labels
+
+                if (row === 0) {
+                  cell
+                    .append('text')
+                    .attr('dx', plotWidth / 2)
+                    .attr('dy', -5)
+                    .attr('text-anchor', 'middle')
+                    .attr('class', 'topLabel')
+                    .text(xProperty);
+                }
+
+                if (column === numericProperties.length - 1) {
+                  cell
+                    .append('text')
+                    .attr('dy', -plotHeight - 5)
+                    .attr('dx', plotWidth / 2)
+                    .attr('text-anchor', 'middle')
+                    .attr('transform', 'rotate(90)')
+                    .attr('class', 'rightLabel')
+                    .text(yProperty);
+                }
+
                 scope.cellsInfo[xProperty][yProperty].xScale = xScale;
                 scope.cellsInfo[xProperty][yProperty].yScale = yScale;
                 scope.cellsInfo[xProperty][yProperty].plotX = plotX;
