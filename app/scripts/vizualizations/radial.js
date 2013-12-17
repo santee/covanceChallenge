@@ -12,13 +12,13 @@ angular.module('radial', ['dataProvider', 'd3'])
         link: function (scope, element) {
 
           var selectionAnimationDuration = 300;
-          var appearanceAnimationDuration = 1200;
+          var appearanceAnimationDuration = 1000;
 
           var selectedColor = 'yellow';
-          var selectedStroke = '#666';
+          var selectedStroke = '#888';
           var defaultStroke = '#888';
           var colorScale = d3.scale.category20b();
-          var unselectedOpacity = 0.5;
+          var unselectedOpacity = 1;
           var selectionValueModifier = 4;
 
           var infoBoxDeferred = $q.defer();

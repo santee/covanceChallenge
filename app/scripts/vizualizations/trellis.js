@@ -43,11 +43,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
 //              circleContext.clearRect(0,0, defaultRadius * 2, defaultRadius * 2);
 
               circleContext.beginPath();
-              circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2 * Math.PI, false);
+              //circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2 * Math.PI, false);
+
+              circleContext.rect(0, 0, defaultRadius*2, defaultRadius*2);
 
               circleContext.fillStyle = 'rgba(255,255,255,1)';
               circleContext.fill();
-              circleContext.strokeStyle = 'white';
+              circleContext.strokeStyle = 'rgba(255,255,255,1)';
               circleContext.stroke();
 
               circleContext.fillStyle = color;
@@ -77,7 +79,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
               if (!unselectedCirclesPrerendered.hasOwnProperty(color)) {
                 var fillStyle = 'rgba(211,211,211,0.5)';
-                var transparentStrokeStyle = 'rgba(' + strokeStyle.r + ',' + strokeStyle.g + ',' + strokeStyle.b + ', 0.1)';
+                var transparentStrokeStyle = 'rgba(' + strokeStyle.r + ',' + strokeStyle.g + ',' + strokeStyle.b + ', 0.5)';
                 unselectedCirclesPrerendered[color] = createCircleImage(fillStyle, transparentStrokeStyle);
               }
             });
@@ -93,7 +95,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             // we cannot just use setTimeout instead of requestAnimationFrame tho,
             //so we just check if time spent since last update is more then specified interval.
             //To change maximum fps, just change fps variable
-            var fps = 20;
+            var fps = 10;
             var now = Date.now();
             var then = Date.now();
             var interval = 1000 / fps;
@@ -128,6 +130,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                     var recX = x - defaultRadius;
                     var recY = y - defaultRadius;
+
 
                     //there is no need to use long version of drawImage call,
                     //but this might improve performance to specify all parameters in a row
@@ -363,7 +366,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
                     var outOfSelection = e[0][0] > item[xProp] || item[xProp] > e[1][0] ||
                       e[0][1] > item[yProp] || item[yProp] > e[1][1];
 
-                    if (item.isSelected() === outOfSelection) {
+                    if (item.isSelected() == outOfSelection) {
                       //  elementsChanged = true;
                       item.select(!outOfSelection);
                       elementsToUpdate.push(item);
