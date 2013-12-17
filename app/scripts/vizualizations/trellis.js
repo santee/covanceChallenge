@@ -85,7 +85,24 @@ angular.module('trellis', ['dataProvider', 'd3'])
             context.webkitImageSmoothingEnabled = false;
             context.imageSmoothingEnabled = false;
 
-            function render() {
+            //fps settings, we do not need 60 fps by default.
+            // we cannot just use setTimeout instead of requestAnimationFrame tho,
+            //so we just check if time spent since last update is more then specified interval.
+            //To change maximum fps, just change fps variable
+            var fps = 20;
+            var now = Date.now();
+            var then = Date.now();
+            var interval = 1000/fps;
+            var delta;
+
+            function drawCanvas() {
+
+              now = Date.now();
+              delta = now - then;
+              if (delta <= interval) {
+                then = now - (delta % interval);
+                return;
+              }
 
               elementsToUpdate.forEach(function(d) {
 
@@ -117,7 +134,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             }
 
             (function animloop() {
-              render();
+              drawCanvas();
               requestAnimFrame(animloop);
             })();
           };
