@@ -93,20 +93,20 @@ angular.module('trellis', ['dataProvider', 'd3'])
             // we cannot just use setTimeout instead of requestAnimationFrame tho,
             //so we just check if time spent since last update is more then specified interval.
             //To change maximum fps, just change fps variable
-//            var fps = 20;
-//            var now = Date.now();
-//            var then = Date.now();
-//            var interval = 1000 / fps;
-//            var delta;
+            var fps = 20;
+            var now = Date.now();
+            var then = Date.now();
+            var interval = 1000 / fps;
+            var delta;
 
             function drawCanvas() {
 
-//              now = Date.now();
-//              delta = now - then;
-//              if (delta <= interval) {
-//                then = now - (delta % interval);
-//                return;
-//              }
+              now = Date.now();
+              delta = now - then;
+              if (delta <= interval) {
+                then = now - (delta % interval);
+                return;
+              }
 
               elementsToUpdate.forEach(function (d) {
 
@@ -164,21 +164,23 @@ angular.module('trellis', ['dataProvider', 'd3'])
           var width = d3.select(element[0]).node().offsetWidth;
           var height = width;
 
+          var svg = d3.select(element[0])
+            .append('svg')
+            //.style('height', height + 'px')
+            //.style('width', '100%')
+            .attr('preserveAspectRatio', 'xMinYMin slice');
+
           var canvasElement = d3.select(element[0])
             .append('canvas')
             .attr('height', height)
             .attr('width', width)
+            .style('pointer-events', 'none')
             //.style('padding', '30px 10px 10px 10px')
             [0][0];
 
           var canvas = canvasElement.getContext('2d');
           canvas.strokeStyle = 'rgba(0,100,160,0.1)';
 
-          var svg = d3.select(element[0])
-            .append('svg')
-            //.style('height', height + 'px')
-            //.style('width', '100%')
-            .attr('preserveAspectRatio', 'xMinYMin slice');
 
           //specify same height as width
           //d3.select(element[0]).node().offsetHeight = height;
