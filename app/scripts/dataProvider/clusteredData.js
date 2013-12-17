@@ -2,7 +2,7 @@
 
 angular.module('dataProvider')
   .factory('clusteredData', ['$q', '$log', '$http', '$location', 'ClusterNode', function ($q, $log, $http, $location, ClusterNode) {
-    var dataset = $location.search()['setName'];
+    var dataset = $location.search().setName;
     var clusters = $http.get('/api/clusters', { params: { setName: dataset } });
     var d = $q.defer();
 

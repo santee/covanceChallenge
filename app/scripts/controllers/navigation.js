@@ -6,7 +6,7 @@ angular.module('covanceChallengeApp')
     $scope.maxDepth = 5;
     $scope.datasets = [];
 
-    $scope.dataset = $location.search()['setName'];
+    $scope.dataset = $location.search().setName;
     $log.info('dataset ' + $scope.dataset);
 
     datasetList.then(function (datasets) {
