@@ -176,13 +176,33 @@ angular.module('radial', ['dataProvider', 'd3'])
             $rootScope.$apply();
           };
 
-          scope.onMouseOver = function(d,e) {
-            scope.pointedCluster = d;
+          scope.onMouseOver = function(pointed) {
+            scope.pointedCluster = pointed;
+
+            scope
+              .arcs
+              .style('stroke-width', function(d) {
+                if (d === pointed || d.isDescendantOf(pointed)) {
+                  return 3;
+                } else {
+                  return 1;
+                }
+              });
+
             $rootScope.$apply();
           };
 
-          scope.onMouseOut = function() {
+          scope.onMouseOut = function(leftItem) {
             scope.pointedCluster = null;
+
+            scope
+              .arcs
+              .style('stroke-width', function(d) {
+                if (d === leftItem) {
+                  return 1;
+                }
+              });
+
             $rootScope.$apply();
           };
 

@@ -82,6 +82,19 @@ angular.module('dataProvider')
       };
 
 
+      self.isDescendantOf = function(ancestor) {
+        if (self.parent === ancestor) {
+          return true;
+        }
+
+        if (self.parent === null) {
+          return false;
+        }
+
+        return self.parent.isDescendantOf(ancestor);
+
+      };
+
       //finds maximum depth in current branch (not in the whole tree)
       self.findMaxDepth = function () {
 
