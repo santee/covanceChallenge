@@ -39,6 +39,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
               circle.width = defaultRadius * 2;
               circle.height = defaultRadius * 2;
               var circleContext = circle.getContext('2d');
+
+//              circleContext.clearRect(0,0, defaultRadius * 2, defaultRadius * 2);
+
               circleContext.beginPath();
               circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2 * Math.PI, false);
 
@@ -82,27 +85,28 @@ angular.module('trellis', ['dataProvider', 'd3'])
             elementsToUpdate = data;
 
             context.globalCompositeOperation = 'source-over';
-            context.webkitImageSmoothingEnabled = false;
-            context.imageSmoothingEnabled = false;
+            //context.globalCompositeOperation = 'source-over';
+            //context.webkitImageSmoothingEnabled = false;
+            //context.imageSmoothingEnabled = false;
 
             //fps settings, we do not need 60 fps by default.
             // we cannot just use setTimeout instead of requestAnimationFrame tho,
             //so we just check if time spent since last update is more then specified interval.
             //To change maximum fps, just change fps variable
-            var fps = 20;
-            var now = Date.now();
-            var then = Date.now();
-            var interval = 1000 / fps;
-            var delta;
+//            var fps = 20;
+//            var now = Date.now();
+//            var then = Date.now();
+//            var interval = 1000 / fps;
+//            var delta;
 
             function drawCanvas() {
 
-              now = Date.now();
-              delta = now - then;
-              if (delta <= interval) {
-                then = now - (delta % interval);
-                return;
-              }
+//              now = Date.now();
+//              delta = now - then;
+//              if (delta <= interval) {
+//                then = now - (delta % interval);
+//                return;
+//              }
 
               elementsToUpdate.forEach(function (d) {
 
@@ -127,8 +131,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                     //there is no need to use long version of drawImage call,
                     //but this might improve performance to specify all parameters in a row
-                    //context.drawImage(eraser, recX, recY);
-                    context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
+                    context.drawImage(pointImage, recX, recY);
+                    //context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
                   });
                 });
               });
@@ -324,9 +328,13 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 scope.cellsInfo[xProperty][yProperty].plotX = plotX;
                 scope.cellsInfo[xProperty][yProperty].plotY = plotY;
 
+                var brush = d3.svg.brush()
+                  .x(xScale)
+                  .y(yScale);
 
                 var brushStart = function () {
                   itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
+//                  elementsToUpdate = scope.clusterItems;
 
                   if (brushCell !== this) {
                     currentBrush = brush;
@@ -337,12 +345,21 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 };
 
                 var brushMove = function () {
+
+                  var xProp = this.xProperty;
+                  var yProp = this.yProperty;
+                  var xScale = scope.cellsInfo[xProp][yProp].xScale;
+                  var yScale = scope.cellsInfo[xProp][yProp].yScale;
+
+                  brush.x(xScale);
+                  brush.y(yScale);
+
                   var e = brush.extent();
                   //var elementsChanged = false;
 
                   _.each(scope.clusterItems, function (item) {
-                    var outOfSelection = e[0][0] > item[xProperty] || item[xProperty] > e[1][0] ||
-                      e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
+                    var outOfSelection = e[0][0] > item[xProp] || item[xProp] > e[1][0] ||
+                      e[0][1] > item[yProp] || item[yProp] > e[1][1];
 
                     if (item.isSelected() === outOfSelection) {
                       //  elementsChanged = true;
@@ -361,15 +378,18 @@ angular.module('trellis', ['dataProvider', 'd3'])
                   scope.update();
                 };
 
-                var brush = d3.svg.brush()
-                  .x(xScale)
-                  .y(yScale)
+                brush
                   .on('brushstart', brushStart)
                   .on('brush', brushMove)
                   .on('brushend', brushEnd);
 
                 cell.append('g')
                   .attr('class', 'area')
+                  .each(function() {
+                    this.xProperty = xProperty;
+                    this.yProperty = yProperty;
+                    this.brush = brush;
+                  })
                   .call(brush);
               });
             });
