@@ -39,6 +39,8 @@ var api = require('./lib/controllers/api'),
 
 // Server Routes
 app.get('/api/clusters', api.clusters);
+app.get('/api/data', api.data);
+app.get('/api/dataSetNames', api.dataSetNames);
 
 // Angular Routes
 app.get('/partials/*', controllers.partials);
