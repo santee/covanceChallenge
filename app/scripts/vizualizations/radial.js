@@ -72,10 +72,11 @@ angular.module('radial', ['dataProvider', 'd3'])
           };
 
           var partitionValue = function (d) {
+            var value = d.totalItemsCount;
             if (d.isSelected()) {
-              return selectionValueModifier;
+              return value * selectionValueModifier;
             }
-            return 1;
+            return value;
           };
 
           var partition = d3.layout.partition()
