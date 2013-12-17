@@ -18,7 +18,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               window.oRequestAnimationFrame      ||
               window.msRequestAnimationFrame     ||
               function( callback ){
-                window.setTimeout(callback, 1000 / 1);
+                window.setTimeout(callback, 1000 / 60);
               };
           })();
 
@@ -30,25 +30,67 @@ angular.module('trellis', ['dataProvider', 'd3'])
           itemsSelectionService.onClusterSelectionChanged(onClusterSelectionChange);
 
           scope.renderPoints = function(data, context) {
+            //at first, prerender all possible images to increase performance
+
+            function createCircleImage(color, strokeColor, opacity) {
+              //canvas2d.fillStyle = 'rgba(255,255,255,0)';
+
+              var circle = document.createElement('canvas');
+              circle.width = defaultRadius * 2;
+              circle.height = defaultRadius * 2;
+              var circleContext = circle.getContext('2d');
+              circleContext.beginPath();
+              circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2*Math.PI, false);
+
+              circleContext.fillStyle = 'rgba(255,255,255,1)';
+              circleContext.fill();
+              circleContext.strokeStyle = 'white';
+              circleContext.stroke();
+
+              circleContext.fillStyle = color;
+              circleContext.fill();
+              circleContext.strokeStyle = strokeColor;
+              circleContext.stroke();
+
+              circleContext.closePath();
+
+              return circle;
+            }
+
+            //eraser
+            //var eraser = createCircleImage('rgba(255,255,255,1)', 'white', 1);
+
+            var selectedCirclesPrerendered = {};
+            var unselectedCirclesPrerendered = {};
+
+            //fill prerendered circles
+            _.each(data, function(item){
+              var color = getColor(item);
+              var strokeStyle = d3.rgb(color);
+
+              if (!selectedCirclesPrerendered.hasOwnProperty(color)) {
+                selectedCirclesPrerendered[color] = createCircleImage(color, strokeStyle.toString(), 1);
+              }
+
+              if (!unselectedCirclesPrerendered.hasOwnProperty(color)) {
+                var fillStyle = 'rgba(211,211,211,0.5)';
+                var transparentStrokeStyle = 'rgba(' + strokeStyle.r + ',' + strokeStyle.g + ',' + strokeStyle.b + ', 0.1)';
+                unselectedCirclesPrerendered[color] = createCircleImage(fillStyle, transparentStrokeStyle, 1);
+              }
+            });
+
             elementsToUpdate = data;
 
             context.globalCompositeOperation = 'source-over';
+            context.webkitImageSmoothingEnabled = false;
+            context.imageSmoothingEnabled = false;
 
             function render() {
+
               elementsToUpdate.forEach(function(d) {
 
                 var fillStyle = getColor(d);
-                var strokeStyle = d3.rgb(fillStyle);
-
-                if (!d.isSelected()) {
-                  fillStyle = 'rgba(211,211,211,0.5)';
-                  strokeStyle = 'rgba(' + strokeStyle.r + "," + strokeStyle.g + ',' + strokeStyle.b + ', 0.1)';
-                } else {
-                  strokeStyle = strokeStyle.toString();
-                }
-//                else{
-//                  fillStyle = 'rgba(100,100,100, 1)';
-//                }
+                var pointImage = d.isSelected() ? selectedCirclesPrerendered[fillStyle] : unselectedCirclesPrerendered[fillStyle];
 
                 scope.selectedNumericProperties.forEach(function(xProperty) {
                     scope.selectedNumericProperties.forEach(function(yProperty){
@@ -63,23 +105,11 @@ angular.module('trellis', ['dataProvider', 'd3'])
                       var x = x0 + xScale(d[xProperty]);
                       var y = y0 + yScale(d[yProperty]);
 
-                      context.beginPath();
-                      context.arc(x, y, defaultRadius, 2*Math.PI, false);
-                      context.fillStyle = 'rgba(255,255,255,1)';
-                      context.fill();
-                      context.strokeStyle = 'white';
-                      context.stroke();
+                      var recX = x - defaultRadius;
+                      var recY = y - defaultRadius;
 
-//                      context.beginPath();
-//                      context.arc(x, y, defaultRadius, 2*Math.PI, false);
-                      context.fillStyle = fillStyle;
-                      context.fill();
-                      //context.lineWidth = -0.5;
-                      context.strokeStyle = strokeStyle;
-                      //context.antiAlias(true);
-
-                      //context.lineWidth = 0;
-                      context.stroke();
+                      //context.drawImage(eraser, recX, recY);
+                      context.drawImage(pointImage, recX, recY);
                     });
                   });
               });
@@ -87,8 +117,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
             }
 
             (function animloop() {
-              requestAnimFrame(animloop);
               render();
+              requestAnimFrame(animloop);
             })();
           };
 
