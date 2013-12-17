@@ -11,25 +11,25 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var elementsToUpdate = [];
 
-          var requestAnimFrame = (function(){
-            return window.requestAnimationFrame       ||
+          var requestAnimFrame = (function () {
+            return window.requestAnimationFrame ||
               window.webkitRequestAnimationFrame ||
-              window.mozRequestAnimationFrame    ||
-              window.oRequestAnimationFrame      ||
-              window.msRequestAnimationFrame     ||
-              function( callback ){
+              window.mozRequestAnimationFrame ||
+              window.oRequestAnimationFrame ||
+              window.msRequestAnimationFrame ||
+              function (callback) {
                 window.setTimeout(callback, 1000 / 60);
               };
           })();
 
 
-          var onClusterSelectionChange = function(e) {
+          var onClusterSelectionChange = function (e) {
             elementsToUpdate = elementsToUpdate.concat(e.cluster.items);
           };
 
           itemsSelectionService.onClusterSelectionChanged(onClusterSelectionChange);
 
-          scope.renderPoints = function(data, context) {
+          scope.renderPoints = function (data, context) {
             //at first, prerender all possible images to increase performance
 
             function createCircleImage(color, strokeColor, opacity) {
@@ -40,7 +40,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
               circle.height = defaultRadius * 2;
               var circleContext = circle.getContext('2d');
               circleContext.beginPath();
-              circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2*Math.PI, false);
+              circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2 * Math.PI, false);
 
               circleContext.fillStyle = 'rgba(255,255,255,1)';
               circleContext.fill();
@@ -64,7 +64,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var unselectedCirclesPrerendered = {};
 
             //fill prerendered circles
-            _.each(data, function(item){
+            _.each(data, function (item) {
               var color = getColor(item);
               var strokeStyle = d3.rgb(color);
 
@@ -92,7 +92,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
             var fps = 20;
             var now = Date.now();
             var then = Date.now();
-            var interval = 1000/fps;
+            var interval = 1000 / fps;
             var delta;
 
             function drawCanvas() {
@@ -104,33 +104,33 @@ angular.module('trellis', ['dataProvider', 'd3'])
                 return;
               }
 
-              elementsToUpdate.forEach(function(d) {
+              elementsToUpdate.forEach(function (d) {
 
                 var fillStyle = getColor(d);
                 var pointImage = d.isSelected() ? selectedCirclesPrerendered[fillStyle] : unselectedCirclesPrerendered[fillStyle];
 
-                scope.selectedNumericProperties.forEach(function(xProperty) {
-                    scope.selectedNumericProperties.forEach(function(yProperty){
+                scope.selectedNumericProperties.forEach(function (xProperty) {
+                  scope.selectedNumericProperties.forEach(function (yProperty) {
 
-                      var info = scope.cellsInfo[xProperty][yProperty];
+                    var info = scope.cellsInfo[xProperty][yProperty];
 
-                      var xScale = info.xScale;
-                      var yScale = info.yScale;
-                      var x0 = info.plotX;
-                      var y0 = info.plotY;
+                    var xScale = info.xScale;
+                    var yScale = info.yScale;
+                    var x0 = info.plotX;
+                    var y0 = info.plotY;
 
-                      var x = x0 + xScale(d[xProperty]);
-                      var y = y0 + yScale(d[yProperty]);
+                    var x = x0 + xScale(d[xProperty]);
+                    var y = y0 + yScale(d[yProperty]);
 
-                      var recX = x - defaultRadius;
-                      var recY = y - defaultRadius;
+                    var recX = x - defaultRadius;
+                    var recY = y - defaultRadius;
 
-                      //there is no need to use long version of drawImage call,
-                      //but this might improve performance to specify all parameters in a row
-                      //context.drawImage(eraser, recX, recY);
-                      context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
-                    });
+                    //there is no need to use long version of drawImage call,
+                    //but this might improve performance to specify all parameters in a row
+                    //context.drawImage(eraser, recX, recY);
+                    context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
                   });
+                });
               });
               elementsToUpdate = [];
             }
@@ -199,7 +199,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
             scope.cellsInfo = {};
 
-            var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.3, 0.2);
+            var plotsScale = d3.scale.ordinal().domain(d3.range(numericProperties.length)).rangeRoundBands([0, width], 0.1, 0.2);
 
             var brushCell = null;
 
@@ -211,9 +211,9 @@ angular.module('trellis', ['dataProvider', 'd3'])
               }
             };
 
-            $rootScope.$watch(function() {
+            $rootScope.$watch(function () {
               return itemsSelectionService.currentSelector;
-            }, function(newSelectorName) {
+            }, function (newSelectorName) {
               if (newSelectorName !== itemsSelectionService.Selectors.ITEMS) {
                 turnOffBrush();
               }
@@ -256,30 +256,45 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 //set up axis
 
-                var xAxis = d3.svg.axis()
-                  .scale(xScale)
-                  .orient('bottom')
-                  .ticks(4)
-                  .tickSize(-plotWidth, 0, 0);
-
-                var yAxis = d3.svg.axis()
-                  .scale(yScale)
-                  .orient('left')
-                  .ticks(4)
-                  .tickSize(-plotHeight, 0, 0);
-
                 var cell = svg.append('g')
                   .attr('transform', 'translate(' + plotX + ',' + plotY + ')');
 
-                cell.append('g')
-                  .attr('class', 'axis')
-                  .attr('transform', 'translate(' + 0 + ',' + plotHeight + ')')
-                  .call(xAxis);
+                cell
+                  .append('rect')
+                  .attr('x', 0)
+                  .attr('y', 0)
+                  .attr('width', plotWidth)
+                  .attr('height', plotHeight)
+                  .attr('class', 'cell');
 
-                cell.append('g')
-                  .attr('class', 'axis')
-                  .attr('transform', 'translate(' + 0 + ', ' + 0 + ')')
-                  .call(yAxis);
+                var ticksSize = plotsScale(numericProperties.length - 1) + plotsScale.rangeBand() - plotsScale(0);
+
+                if (row === numericProperties.length - 1) {
+
+                  var xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .orient('bottom')
+                    .ticks(5)
+                    .tickSize(-ticksSize, 0, 0);
+
+                  cell.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(' + 0 + ',' + plotHeight + ')')
+                    .call(xAxis);
+                }
+
+                if (column === 0) {
+                  var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient('left')
+                    .ticks(4)
+                    .tickSize(-ticksSize, 0, 0);
+
+                  cell.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(' + 0 + ', ' + 0 + ')')
+                    .call(yAxis);
+                }
 
                 scope.cellsInfo[xProperty][yProperty].xScale = xScale;
                 scope.cellsInfo[xProperty][yProperty].yScale = yScale;
@@ -307,7 +322,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
                       e[0][1] > item[yProperty] || item[yProperty] > e[1][1];
 
                     if (item.isSelected() === outOfSelection) {
-                    //  elementsChanged = true;
+                      //  elementsChanged = true;
                       item.select(!outOfSelection);
                       elementsToUpdate.push(item);
                     }

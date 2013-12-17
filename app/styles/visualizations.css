@@ -48,9 +48,15 @@ canvas, svg {
 
 .axis line {
     stroke: #ddd;
+    stroke-width: 1;
 }
 
 /*TRELLIS styling*/
+
+rect.cell {
+    fill: none;
+    stroke: #aaa;
+}
 
 rect.extent {
     fill: #000;
