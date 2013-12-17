@@ -3,7 +3,6 @@
 angular.module('covanceChallengeApp')
   .controller('NavigationCtrl', ['$scope', '$location', '$log', 'datasetList', function ($scope, $location, $log, datasetList) {
 
-    $scope.maxDepth = 5;
     $scope.datasets = [];
 
     $scope.dataset = $location.search().setName;
