@@ -2,7 +2,7 @@
 
 angular.module('radial', ['dataProvider', 'd3'])
   .directive('d3Radial', ['$compile', '$http', '$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService',
-    function ($compile, $http, $q, d3, clusteredData, $rootScope, itemsSelectionService) {
+    function ($compile, $http, $q,  d3, clusteredData, $rootScope, itemsSelectionService) {
 
       return {
         restrict: 'EA',
