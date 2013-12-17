@@ -1,18 +1,26 @@
 <div class="infoBox" ng-class="{hidden: pointedCluster === null}" ng-style="{left: tooltipX, top:tooltipY}">
-
-    <h3>Cluster! Cluster! Obey your master!!</h3>
-
-    <p><b>Id:</b> {{pointedCluster.id}}</p>
-    <p><b>Total items count:</b> {{pointedCluster.totalItemsCount}}</p>
-
-    <h4>Most frequent text values:</h4>
-    <ul ng-repeat="propertyName in pointedCluster.commonTextProperties">
-        <li><b>{{propertyName}}</b> : {{pointedCluster.topTextValues[propertyName]}}</li>
-    </ul>
-
-    <h4>Average numeric values:</h4>
-    <ul ng-repeat="propertyName in pointedCluster.commonNumericProperties">
-        <li><b>{{propertyName}}</b>: {{pointedCluster.averageNumericValues[propertyName]}}</li>
-    </ul>
-
+  <div class="arrow"></div>
+  <h3 class="popover-title">Cluster info</h3>
+  <div class="popover-content">
+    <dl class="dl-horizontal">
+      <dt>Id</dt>
+      <dd>{{pointedCluster.id}}</dd>
+      <dt>Total items count</dt>
+      <dd>{{pointedCluster.totalItemsCount}}</dd>
+    </dl>
+    <dl>
+      <dt>Most frequent text values</dt>
+      <dd>
+        <ul>
+          <li ng-repeat="propertyName in pointedCluster.commonTextProperties">{{propertyName}}: <em>{{pointedCluster.topTextValues[propertyName]}}</em></li>
+        </ul>
+      </dd>
+      <dt>Average numeric values</dt>
+      <dd>
+        <ul>
+          <li ng-repeat="propertyName in pointedCluster.commonNumericProperties">{{propertyName}}: <em>{{pointedCluster.averageNumericValues[propertyName] | number}}</em></li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
 </div>
