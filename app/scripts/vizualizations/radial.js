@@ -76,7 +76,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.lens.setSvg(svg[0][0]);
           };
 
-          scope.removeLens = function() {
+          scope.removeLens = function () {
             if (scope.zoomedCanvas !== null) {
               $(scope.zoomedCanvas).remove();
             }
@@ -233,10 +233,11 @@ angular.module('radial', ['dataProvider', 'd3'])
 
             scope
               .arcs
-              .style('stroke-width', function (d) {
-                if (d === leftItem) {
-                  return 1;
-                }
+              .filter(function (d) {
+                return d === leftItem;
+              })
+              .style('stroke-width', function () {
+                return 1;
               });
 
             $rootScope.$apply();
@@ -316,8 +317,8 @@ angular.module('radial', ['dataProvider', 'd3'])
               zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 80 + 'px';
               //element.append(zoomed);
             })
-            .on('mouseenter', scope.updateLens)
-            .on('mouseleave', scope.removeLens);
+              .on('mouseenter', scope.updateLens)
+              .on('mouseleave', scope.removeLens);
           };
 
           scope.zoomedCanvas = null;
@@ -379,7 +380,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
       self.setSvg = function (element) {
         var xml = (new XMLSerializer()).serializeToString(element);
-        self.ctx.clearRect(0,0,self.width, self.height);
+        self.ctx.clearRect(0, 0, self.width, self.height);
 
         self.ctx.drawSvg(xml, 0, 0, self.width, self.height);
       };
