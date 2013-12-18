@@ -403,7 +403,17 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         zoomContext.save();
         zoomContext.beginPath();
+
         zoomContext.arc(radius, radius, radius, 0, 2 * Math.PI);
+        zoomContext.clip();
+        zoomContext.fillStyle = 'lightGrey';
+        zoomContext.fillRect(0,0, radius * 2, radius * 2);
+        zoomContext.restore();
+
+        var lensStroke = 3;
+        zoomContext.save();
+        zoomContext.beginPath();
+        zoomContext.arc(radius, radius, radius - lensStroke, 0, 2 * Math.PI);
         zoomContext.clip();
 
         zoomContext.fillStyle = 'white';
@@ -412,6 +422,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         //adjusting coordinates...
         var sourceX = Math.max(x - radius + 110, 0) * self.modifier;
         var sourceY = Math.max(y - radius + 110, 0) * self.modifier;
+
         zoomContext.drawImage(self.canvas, sourceX, sourceY, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
         zoomContext.restore();
 
