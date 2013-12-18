@@ -14,17 +14,6 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 //          scope.useLens = true;
 
-          var zoomDiv;
-
-          $rootScope.$watch( function() {
-            return scope.useLens;
-          }, function(){
-              scope.useAnimation = !scope.useLens;
-              if (zoomDiv !== null) {
-                zoomDiv.style.visibility = scope.useLens ? 'visible' : 'hidden';
-              }
-            }
-          );
 
           scope.useAnimation = !scope.useLens;
 
@@ -78,8 +67,8 @@ angular.module('radial', ['dataProvider', 'd3'])
           });
 
 
+          //Lens stuff
           var radius = Math.min(width, height) / 2.2;
-
           var lensRadius = 150;
           scope.lens = new RadialLens(element[0], 4, lensRadius, width, height);
           var zoomDiv = document.createElement('div');
@@ -87,6 +76,21 @@ angular.module('radial', ['dataProvider', 'd3'])
           zoomDiv.width = lensRadius * 2;
           zoomDiv.style.position = 'absolute';
           element[0].appendChild(zoomDiv);
+
+          scope.updateLens = function () {
+            scope.lens.setSvg(svg[0][0]);
+          };
+
+          $rootScope.$watch(function () {
+              return scope.useLens;
+            }, function () {
+              scope.useAnimation = !scope.useLens;
+              zoomDiv.style.visibility = scope.useLens ? 'visible' : 'hidden';
+              if (scope.useLens) {
+                scope.updateLens();
+              }
+            }
+          );
 
           //parition stuff
           var partitionChildren = function (d) {
@@ -165,10 +169,6 @@ angular.module('radial', ['dataProvider', 'd3'])
               .style('stroke', function (d) {
                 return d.isSelected() ? selectedStroke : defaultStroke;
               });
-          };
-
-          scope.updateLens = function() {
-            scope.lens.setSvg(svg[0][0]);
           };
 
           //repaints only one leaf, with opacity / color change
