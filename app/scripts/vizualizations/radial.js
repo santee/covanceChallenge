@@ -81,6 +81,12 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.lens.setSvg(svg[0][0]);
           };
 
+          scope.removeLens = function() {
+            if (scope.zoomedCanvas !== null) {
+              scope.zoomedCanvas.remove();
+            }
+          };
+
           $rootScope.$watch(function () {
               return scope.useLens;
             }, function () {
@@ -317,17 +323,16 @@ angular.module('radial', ['dataProvider', 'd3'])
               $rootScope.$apply();
 
               var zoomed = scope.lens.getZoomedCanvas(coordinates[0], coordinates[1]);
-
-              if (scope.zoomedCanvas !== null) {
-                scope.zoomedCanvas.remove();
-              }
+              scope.removeLens();
 
               zoomDiv.appendChild(zoomed);
               scope.zoomedCanvas = zoomed;
               zoomDiv.style.left = coordinates[0] - lensRadius / 2 - 80 + 'px';
               zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 80 + 'px';
               //element.append(zoomed);
-            });
+            })
+              .on('mouseenter', scope.updateLens)
+              .on('mouseleave', scope.removeLens);
           };
 
           scope.zoomedCanvas = null;
@@ -393,7 +398,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
       self.setSvg = function (element) {
         var xml = (new XMLSerializer()).serializeToString(element);
-        //self.ctx.clearRect(0,0,self.width, self.height);
+        self.ctx.clearRect(0,0,self.width, self.height);
 
         //var context = document.getElementById('test3').getContext('2d');
 
