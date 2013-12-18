@@ -1,10 +1,10 @@
-<div ng-switch="isBusy" class="col-md-12">
-  <div ng-switch-when="true" class="spinner">
+<div class="col-md-12">
+  <div ng-hide="!isBusy" class="spinner">
     <div class="centered">
-      <img src="images/spinner.gif" class="img-responsive center-block" />
+      <span class="label label-default">Loading...</span>
     </div>
   </div>
-  <div ng-switch-when="false">
+  <div ng-hide="isBusy">
     <div class="row">
       <div class="col-md-12">
         <form class="form-horizontal">
@@ -19,9 +19,13 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div d3-radial class="radial graphContainer" data-display-depth="displayDepth"></div>
+        <div d3-radial class="radial graphContainer" data-display-depth="displayDepth" data-use-lens="false"></div>
         <div d3-trellis class="trellis graphContainer"> </div>
+        <div id="zoom" style="height: 200px; width: 200px">
+
+        </div>
       </div>
     </div>
   </div>
 </div>
+

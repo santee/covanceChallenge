@@ -9,6 +9,9 @@ Installation:
 4. npm install karma -g
 5. npm install bower -g
 6. npm install jasmine-node -g
+
+From project folder:
+
 7. npm install
 8. bower install
 9. grunt serve

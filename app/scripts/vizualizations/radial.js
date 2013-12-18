@@ -1,15 +1,21 @@
 'use strict';
 
 angular.module('radial', ['dataProvider', 'd3'])
-  .directive('d3Radial', ['$compile', '$http', '$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService',
-    function ($compile, $http, $q,  d3, clusteredData, $rootScope, itemsSelectionService) {
+  .directive('d3Radial', ['$compile', '$http', '$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService', 'radialLens',
+    function ($compile, $http, $q, d3, clusteredData, $rootScope, itemsSelectionService, RadialLens) {
 
       return {
         restrict: 'EA',
         scope: {
-          displayDepth: '='
+          displayDepth: '=',
+          useLens: '='
         },
         link: function (scope, element) {
+
+//          scope.useLens = true;
+
+          scope.useAnimation = !scope.useLens;
+
 
           var selectionAnimationDuration = 300;
           var appearanceAnimationDuration = 1000;
@@ -61,13 +67,13 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 
           var radius = Math.min(width, height) / 2.2;
+          scope.lens = new RadialLens(element[0], 5, 100, width, height);
 
+          //parition stuff
           var partitionChildren = function (d) {
-
             if (d.nodeDepth >= scope.displayDepth) {
               return [];
             }
-
             return d.nodes;
           };
 
@@ -125,7 +131,6 @@ angular.module('radial', ['dataProvider', 'd3'])
             return colorScale(id);
           };
 
-
           scope.updateStyle = function (arcs) {
 
             var hasSelectedCluster = itemsSelectionService.selectedCluster !== null;
@@ -148,25 +153,35 @@ angular.module('radial', ['dataProvider', 'd3'])
             var arcs = scope.arcs
               .filter(function (d) {
                 return d.id === cluster.id;
-              })
-              .transition()
-              .duration(selectionAnimationDuration);
+              });
+
+            if (scope.useAnimation) {
+              arcs = arcs
+                .transition()
+                .duration(selectionAnimationDuration);
+            }
 
             scope.updateStyle(arcs);
           };
 
           scope.repaint = function () {
-            var nodes = partition.nodes;
-            var arcs = scope.arcs
-              .data(nodes)
-              .transition()
-              .duration(selectionAnimationDuration)
-              .attrTween('d', arcTween);
+            var arcs = scope.arcs;
+            if (scope.useAnimation) {
+              var nodes = partition.nodes;
+
+              arcs = scope.arcs
+                .data(nodes)
+                .transition()
+                .duration(selectionAnimationDuration)
+                .attrTween('d', arcTween);
+            }
 
             //if (itemsSelectionService.hasSelectedCluster())
 //            arcs.attrTween('d', arcTween);
 
             scope.updateStyle(arcs);
+
+            scope.lens.setSvg(svg[0][0]);
           };
 
           scope.onClusterClick = function (d) {
@@ -176,12 +191,12 @@ angular.module('radial', ['dataProvider', 'd3'])
             $rootScope.$apply();
           };
 
-          scope.onMouseOver = function(pointed) {
+          scope.onMouseOver = function (pointed) {
             scope.pointedCluster = pointed;
 
             scope
               .arcs
-              .style('stroke-width', function(d) {
+              .style('stroke-width', function (d) {
                 if (d === pointed || d.isDescendantOf(pointed)) {
                   return 3;
                 } else {
@@ -192,12 +207,12 @@ angular.module('radial', ['dataProvider', 'd3'])
             $rootScope.$apply();
           };
 
-          scope.onMouseOut = function(leftItem) {
+          scope.onMouseOut = function (leftItem) {
             scope.pointedCluster = null;
 
             scope
               .arcs
-              .style('stroke-width', function(d) {
+              .style('stroke-width', function (d) {
                 if (d === leftItem) {
                   return 1;
                 }
@@ -236,8 +251,8 @@ angular.module('radial', ['dataProvider', 'd3'])
               //.attr('d', initialArc)
               .each(function (d) {
                 //preserve values for transition
-                d.x0 = d.x * 0.1;
-                d.dx0 = d.dx * 0.4;
+                d.x0 = d.x * (!scope.useAnimation ? 1 : 0.1 );
+                d.dx0 = d.dx * (!scope.useAnimation ? 1 : 0.4);
                 //d.y0 = d.y;
                 //d.dy0 = d.dy * 0.4;
               });
@@ -251,12 +266,18 @@ angular.module('radial', ['dataProvider', 'd3'])
               .selectAll('.arc');
 
             setTimeout(function () {
-              scope
-                .arcs
-                .transition()
-                .duration(appearanceAnimationDuration)
-                .ease('linear')
-                .attrTween('d', arcTween);
+
+              if (scope.useAnimation) {
+                scope
+                  .arcs
+                  .transition()
+                  .duration(appearanceAnimationDuration)
+                  .ease('linear')
+                  .attrTween('d', arcTween);
+              } else {
+                scope.arcs
+                  .attr('d', arc);
+              }
 
               scope.updateStyle(scope.arcs);
 
@@ -266,16 +287,29 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.arcs.on('click', scope.onClusterClick);
             scope.arcs.on('mouseenter', scope.onMouseOver);
             scope.arcs.on('mouseleave', scope.onMouseOut);
-            svg.on('mousemove', function(){
-              var coordinates = d3.mouse( this );
-              scope.tooltipX = (coordinates[0] + 50) + 'px';
+            svg.on('mousemove', function () {
+              var coordinates = d3.mouse(this);
+              scope.tooltipX = (coordinates[0] + 20) + 'px';
               scope.tooltipY = (coordinates[1] + 10) + 'px';
               $rootScope.$apply();
+
+              var zoomed = scope.lens.getZoomedCanvas(coordinates[0], coordinates[1]);
+
+              if (scope.zoomedCanvas !== null) {
+                scope.zoomedCanvas.remove();
+              }
+
+              document.getElementById('zoom').appendChild(zoomed);
+              scope.zoomedCanvas = zoomed;
+              //element.append(zoomed);
             });
           };
 
+          scope.zoomedCanvas = null;
+
           $q.all(clusteredData, scope.infoBox.deferred)
             .then(function (cluster) {
+
               scope.cluster = cluster;
               scope.maxDepth = scope.cluster.findMaxDepth();
               scope.render();
@@ -301,4 +335,88 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         }
       };
-    }]);
+    }])
+  .service('radialLens', function () {
+
+    function RadialLens(parentElement, modifier, radius, originalWidth, originalHeight) {
+      var self = this;
+
+      self.modifier = modifier || 2;
+      self.parentElement = parentElement;
+//      self.originalHeight = originalWidth;
+//      self.originalWidth = originalHeight;
+
+//      self.height = self.originalHeight * self.modifier;
+//      self.width = self.originalWidth * self.modifier;
+      self.height = originalHeight;
+      self.width = originalWidth;
+
+      self.canvas = document.createElement('canvas');
+
+      self.parentElement.appendChild(self.canvas);
+
+      self.canvas.width = self.width;
+      self.canvas.height = self.height;
+      self.canvas.style['pointer-events'] = 'none';
+      self.canvas.style.height = self.height + 'px';
+      self.canvas.style.width = self.width + 'px';
+      self.canvas.style.visibility = 'hidden';
+
+      self.ctx = self.canvas.getContext('2d');
+
+      self.radius = radius || 300;
+
+      self.setSvg = function (element) {
+        var xml = (new XMLSerializer()).serializeToString(element);
+        //self.ctx.clearRect(0,0,self.width, self.height);
+
+        //var context = document.getElementById('test3').getContext('2d');
+
+        //context.drawSvg(xml,0,0, 500, 500);
+
+        self.ctx.drawSvg(xml, 0, 0, self.width, self.height);
+      };
+
+      self.getZoomedCanvas = function (x, y) {
+
+//        return self.canvas.cloneNode();
+
+        var zoomCanvas = document.createElement('canvas');
+        zoomCanvas.width = radius * 2;
+        zoomCanvas.height = radius * 2;
+        zoomCanvas.style.height = radius * 2 + 'px';
+        zoomCanvas.style.width = radius * 2 + 'px';
+        zoomCanvas.style['pointer-events'] = 'none';
+
+        var zoomContext = zoomCanvas.getContext('2d');
+//        zoomContext.beginPath();
+//        zoomContext.arc(50,50, 50, 0, 2*Math.PI, false);
+//        zoomContext.fillStyle = 'black';
+//        zoomContext.fill();
+
+
+        zoomContext.save();
+        zoomContext.beginPath();
+        zoomContext.arc(radius, radius, radius, 0, 2 * Math.PI);
+        zoomContext.clip();
+
+        zoomContext.scale(self.modifier, self.modifier);
+
+
+//        zoomContext.beginPath();
+//        zoomContext.rect(0,0, radius*2, radius*2);
+//        zoomContext.fillStyle = 'black';
+//        zoomContext.fill();
+//
+//
+        var sourceX = Math.max(x - radius + 80, 0);
+        var sourceY = Math.max(y - radius + 80, 0);
+        zoomContext.drawImage(self.canvas, sourceX, sourceY, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
+        zoomContext.restore();
+
+        return zoomCanvas;
+      };
+    }
+
+    return RadialLens;
+  });
