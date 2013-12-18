@@ -1,23 +1,27 @@
-<div class="row">
-
-  <div class="col-md-12">
-    <form class="form-horizontal">
-      <div class="form-group">
-        <label for="maxDepth" class="col-sm-2 control-label">Max depth</label>
-        <div class="col-sm-10">
-          <input id="maxDepth" type="range" max="{{maxDepth}}" min="1" ng-model="displayDepth" class="form-control" title="{{displayDepth}}" />
-        </div>
+<div ng-switch="isBusy" class="col-md-12">
+  <div ng-switch-when="true" class="spinner">
+    <div class="centered">
+      <img src="images/spinner.gif" class="img-responsive center-block" />
+    </div>
+  </div>
+  <div ng-switch-when="false">
+    <div class="row">
+      <div class="col-md-12">
+        <form class="form-horizontal">
+          <div class="form-group">
+            <label for="maxDepth" class="col-sm-2 control-label">Max depth</label>
+            <div class="col-sm-10">
+              <input id="maxDepth" type="range" max="{{maxDepth}}" min="1" ng-model="displayDepth" class="form-control" title="{{displayDepth}}" />
+            </div>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div d3-radial class="radial graphContainer" data-display-depth="displayDepth"></div>
+        <div d3-trellis class="trellis graphContainer"> </div>
+      </div>
+    </div>
   </div>
-
-</div>
-
-<div class="row">
-
-  <div class="col-md-12">
-    <div d3-radial class="radial graphContainer" data-display-depth="displayDepth"></div>
-    <div d3-trellis class="trellis graphContainer"> </div>
-  </div>
-
 </div>
