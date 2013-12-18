@@ -167,8 +167,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var svg = d3.select(element[0])
             .append('svg')
-            //.style('height', height + 'px')
-            //.style('width', '100%')
             .attr('preserveAspectRatio', 'xMinYMin slice');
 
           var canvasElement = d3.select(element[0])
@@ -181,10 +179,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var canvas = canvasElement.getContext('2d');
           canvas.strokeStyle = 'rgba(0,100,160,0.1)';
-
-
-          //specify same height as width
-          //d3.select(element[0]).node().offsetHeight = height;
 
           var colors = d3.scale.category10();
 
@@ -337,7 +331,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var brushStart = function () {
                   itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
-//                  elementsToUpdate = scope.clusterItems;
 
                   if (brushCell !== this) {
                     currentBrush = brush;
