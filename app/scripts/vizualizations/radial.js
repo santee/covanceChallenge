@@ -14,6 +14,18 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 //          scope.useLens = true;
 
+          var zoomDiv;
+
+          $rootScope.$watch( function() {
+            return scope.useLens;
+          }, function(){
+              scope.useAnimation = !scope.useLens;
+              if (zoomDiv !== null) {
+                zoomDiv.style.visibility = scope.useLens ? 'visible' : 'hidden';
+              }
+            }
+          );
+
           scope.useAnimation = !scope.useLens;
 
 
@@ -67,7 +79,14 @@ angular.module('radial', ['dataProvider', 'd3'])
 
 
           var radius = Math.min(width, height) / 2.2;
-          scope.lens = new RadialLens(element[0], 5, 100, width, height);
+
+          var lensRadius = 100;
+          scope.lens = new RadialLens(element[0], 5, lensRadius, width, height);
+          var zoomDiv = document.createElement('div');
+          zoomDiv.height = lensRadius * 2;
+          zoomDiv.width = lensRadius * 2;
+          zoomDiv.style.position = 'absolute';
+          element[0].appendChild(zoomDiv);
 
           //parition stuff
           var partitionChildren = function (d) {
@@ -299,8 +318,10 @@ angular.module('radial', ['dataProvider', 'd3'])
                 scope.zoomedCanvas.remove();
               }
 
-              document.getElementById('zoom').appendChild(zoomed);
+              zoomDiv.appendChild(zoomed);
               scope.zoomedCanvas = zoomed;
+              zoomDiv.style.left = coordinates[0] - lensRadius / 2 - 50 + 'px';
+              zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 50 + 'px';
               //element.append(zoomed);
             });
           };
