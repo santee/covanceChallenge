@@ -11,10 +11,13 @@ angular.module('covanceChallengeApp')
       $scope.clusters = clusters;
       $scope.maxDepth = clusters.findMaxDepth();
       $scope.displayDepth = Math.min(5, $scope.maxDepth);
-      $scope.isBusy= false;      
+      $scope.isBusy = false;
     });
 
-    $scope.$watch('displayDepth', function (newValue) {
+    $scope.$watch(function () {
+      return $scope.displayDepth;
+    }, function (newValue) {
       $scope.displayDepth = parseInt(newValue);
+      console.log($scope.displayDepth);
     });
   }]);

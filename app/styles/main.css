@@ -107,7 +107,7 @@ body > .container .spinner {
 }
 
   body > .container .spinner .centered {
-    width: 624px;
+    width: 100px;
     margin-left: auto;
     margin-right: auto;
     height: 95px;
