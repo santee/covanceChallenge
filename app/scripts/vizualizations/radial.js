@@ -83,7 +83,9 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           scope.removeLens = function() {
             if (scope.zoomedCanvas !== null) {
-              scope.zoomedCanvas.remove();
+              $(scope.zoomedCanvas).remove();
+              //scope.zoomedCanvas.parentNode.removeChild(scope.zoomedCanvas);
+              //zoomDiv.removeChild(scope.zoomedCanvas);
             }
           };
 
