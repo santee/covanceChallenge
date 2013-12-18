@@ -80,8 +80,8 @@ angular.module('radial', ['dataProvider', 'd3'])
 
           var radius = Math.min(width, height) / 2.2;
 
-          var lensRadius = 100;
-          scope.lens = new RadialLens(element[0], 5, lensRadius, width, height);
+          var lensRadius = 150;
+          scope.lens = new RadialLens(element[0], 4, lensRadius, width, height);
           var zoomDiv = document.createElement('div');
           zoomDiv.height = lensRadius * 2;
           zoomDiv.width = lensRadius * 2;
@@ -167,6 +167,10 @@ angular.module('radial', ['dataProvider', 'd3'])
               });
           };
 
+          scope.updateLens = function() {
+            scope.lens.setSvg(svg[0][0]);
+          };
+
           //repaints only one leaf, with opacity / color change
           scope.repaintLeaf = function (cluster) {
             var arcs = scope.arcs
@@ -199,8 +203,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 //            arcs.attrTween('d', arcTween);
 
             scope.updateStyle(arcs);
-
-            scope.lens.setSvg(svg[0][0]);
+            scope.updateLens();
           };
 
           scope.onClusterClick = function (d) {
@@ -299,6 +302,7 @@ angular.module('radial', ['dataProvider', 'd3'])
               }
 
               scope.updateStyle(scope.arcs);
+              scope.updateLens();
 
             }, 100);
 
@@ -320,8 +324,8 @@ angular.module('radial', ['dataProvider', 'd3'])
 
               zoomDiv.appendChild(zoomed);
               scope.zoomedCanvas = zoomed;
-              zoomDiv.style.left = coordinates[0] - lensRadius / 2 - 50 + 'px';
-              zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 50 + 'px';
+              zoomDiv.style.left = coordinates[0] - lensRadius / 2 - 80 + 'px';
+              zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 80 + 'px';
               //element.append(zoomed);
             });
           };
@@ -430,8 +434,8 @@ angular.module('radial', ['dataProvider', 'd3'])
 //        zoomContext.fill();
 //
 //
-        var sourceX = Math.max(x - radius + 80, 0);
-        var sourceY = Math.max(y - radius + 80, 0);
+        var sourceX = Math.max(x - radius + 110, 0);
+        var sourceY = Math.max(y - radius + 110, 0);
         zoomContext.drawImage(self.canvas, sourceX, sourceY, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
         zoomContext.restore();
 
