@@ -3,8 +3,8 @@
 angular.module('covanceChallengeApp')
   .controller('MainCtrl', ['$scope', 'clusteredData', function ($scope, clusteredData) {
 
-    $scope.displayDepth = 0;
-    $scope.maxDepth = 0;
+    $scope.displayDepth = 5;
+    $scope.maxDepth = $scope.displayDepth;
     $scope.isBusy = true;
 
     clusteredData.then(function (clusters) {
