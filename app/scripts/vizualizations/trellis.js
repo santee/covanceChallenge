@@ -134,8 +134,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                     //there is no need to use long version of drawImage call,
                     //but this might improve performance to specify all parameters in a row
-                    context.drawImage(pointImage, recX, recY);
-                    //context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
+                    //context.drawImage(pointImage, recX, recY);
+                    context.drawImage(pointImage, 0, 0, defaultRadius * 2, defaultRadius * 2, recX, recY, defaultRadius * 2, defaultRadius * 2);
                   });
                 });
               });
