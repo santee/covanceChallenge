@@ -11,4 +11,4 @@ Installation:
 6. npm install jasmine-node -g
 7. npm install
 8. bower install
-9. grunt -serve
+9. grunt serve
