@@ -7,7 +7,7 @@ angular.module('covanceChallengeApp')
     $scope.maxDepth = $scope.displayDepth;
     $scope.mode = 'animation';
     $scope.useLens = false;
-    $scope.isBusy = true;    
+    $scope.isBusy = true;
 
     clusteredData.then(function (clusters) {
       $scope.clusters = clusters;

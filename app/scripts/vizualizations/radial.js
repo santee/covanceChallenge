@@ -12,11 +12,7 @@ angular.module('radial', ['dataProvider', 'd3'])
         },
         link: function (scope, element) {
 
-//          scope.useLens = true;
-
-
           scope.useAnimation = !scope.useLens;
-
 
           var selectionAnimationDuration = 300;
           var appearanceAnimationDuration = 1000;
@@ -34,7 +30,6 @@ angular.module('radial', ['dataProvider', 'd3'])
             deferred: infoBoxDeferred.promise
           };
 
-          //var useAnimation = true;
           scope.cluster = null;
           scope.pointedCluster = null;
 
@@ -84,8 +79,6 @@ angular.module('radial', ['dataProvider', 'd3'])
           scope.removeLens = function() {
             if (scope.zoomedCanvas !== null) {
               $(scope.zoomedCanvas).remove();
-              //scope.zoomedCanvas.parentNode.removeChild(scope.zoomedCanvas);
-              //zoomDiv.removeChild(scope.zoomedCanvas);
             }
           };
 
@@ -100,7 +93,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             }
           );
 
-          //parition stuff
+          //partitions stuff
           var partitionChildren = function (d) {
             if (d.nodeDepth >= scope.displayDepth) {
               return [];
@@ -128,6 +121,7 @@ angular.module('radial', ['dataProvider', 'd3'])
               scope.update();
             });
 
+          //function to generate ARCs
           var arc = d3.svg.arc()
             .startAngle(function (d) {
               return d.x;
@@ -142,9 +136,8 @@ angular.module('radial', ['dataProvider', 'd3'])
               return Math.sqrt((d.y + d.dy) * ( d.nodeDepth + 1) / (scope.displayDepth + 1));
             });
 
-          //var colorBrewer = d3.interpolateLab('red', 'blue');
-          //var color = colorBrewer(0.5);
 
+          //returns color according to selection status and parents colors
           var getColor = function (item) {
 
             if (item.isSelected()) {
@@ -195,22 +188,19 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.updateStyle(arcs);
           };
 
+          //updates
           scope.repaint = function () {
-            var arcs = scope.arcs;
             if (scope.useAnimation) {
               var nodes = partition.nodes;
 
-              arcs = scope.arcs
+              scope.arcs
                 .data(nodes)
                 .transition()
                 .duration(selectionAnimationDuration)
                 .attrTween('d', arcTween);
             }
 
-            //if (itemsSelectionService.hasSelectedCluster())
-//            arcs.attrTween('d', arcTween);
-
-            scope.updateStyle(arcs);
+            scope.updateStyle(scope.arcs);
             scope.updateLens();
           };
 
@@ -220,6 +210,7 @@ angular.module('radial', ['dataProvider', 'd3'])
             scope.repaint();
             $rootScope.$apply();
           };
+
 
           scope.onMouseOver = function (pointed) {
             scope.pointedCluster = pointed;
@@ -252,13 +243,11 @@ angular.module('radial', ['dataProvider', 'd3'])
           };
 
           function arcTween(item) {
-            var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0 /* y: item.y0, dy: item.dy0*/ }, item);
+            var interpolate = d3.interpolate({ x: item.x0, dx: item.dx0}, item);
             return function (t) {
               var interpolated = interpolate(t);
               item.x0 = interpolated.x;
               item.dx0 = interpolated.dx;
-              //item.y0 = interpolated.y;
-              //item.dy0 = interpolated.dy;
               return arc(interpolated);
             };
           }
@@ -275,22 +264,16 @@ angular.module('radial', ['dataProvider', 'd3'])
             data
               .enter()
               .append('path')
-              //.attr('display', function(d) { return d.dx < 0.005 ? null : 'none'; })
               .attr('class', 'arc')
-              //.attr('d', arc)
-              //.attr('d', initialArc)
               .each(function (d) {
                 //preserve values for transition
                 d.x0 = d.x * (!scope.useAnimation ? 1 : 0.1 );
                 d.dx0 = d.dx * (!scope.useAnimation ? 1 : 0.4);
-                //d.y0 = d.y;
-                //d.dy0 = d.dy * 0.4;
               });
 
             data
               .exit()
               .remove();
-
 
             scope.arcs = area
               .selectAll('.arc');
@@ -333,8 +316,8 @@ angular.module('radial', ['dataProvider', 'd3'])
               zoomDiv.style.top = coordinates[1] - lensRadius / 2 - 80 + 'px';
               //element.append(zoomed);
             })
-              .on('mouseenter', scope.updateLens)
-              .on('mouseleave', scope.removeLens);
+            .on('mouseenter', scope.updateLens)
+            .on('mouseleave', scope.removeLens);
           };
 
           scope.zoomedCanvas = null;
@@ -375,11 +358,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
       self.modifier = modifier || 2;
       self.parentElement = parentElement;
-//      self.originalHeight = originalWidth;
-//      self.originalWidth = originalHeight;
 
-//      self.height = self.originalHeight * self.modifier;
-//      self.width = self.originalWidth * self.modifier;
       self.height = originalHeight;
       self.width = originalWidth;
 
@@ -402,16 +381,10 @@ angular.module('radial', ['dataProvider', 'd3'])
         var xml = (new XMLSerializer()).serializeToString(element);
         self.ctx.clearRect(0,0,self.width, self.height);
 
-        //var context = document.getElementById('test3').getContext('2d');
-
-        //context.drawSvg(xml,0,0, 500, 500);
-
         self.ctx.drawSvg(xml, 0, 0, self.width, self.height);
       };
 
       self.getZoomedCanvas = function (x, y) {
-
-//        return self.canvas.cloneNode();
 
         var zoomCanvas = document.createElement('canvas');
         zoomCanvas.width = radius * 2;
@@ -421,11 +394,6 @@ angular.module('radial', ['dataProvider', 'd3'])
         zoomCanvas.style['pointer-events'] = 'none';
 
         var zoomContext = zoomCanvas.getContext('2d');
-//        zoomContext.beginPath();
-//        zoomContext.arc(50,50, 50, 0, 2*Math.PI, false);
-//        zoomContext.fillStyle = 'black';
-//        zoomContext.fill();
-
 
         zoomContext.save();
         zoomContext.beginPath();
@@ -434,13 +402,7 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         zoomContext.scale(self.modifier, self.modifier);
 
-
-//        zoomContext.beginPath();
-//        zoomContext.rect(0,0, radius*2, radius*2);
-//        zoomContext.fillStyle = 'black';
-//        zoomContext.fill();
-//
-//
+        //adjusting coordinates...
         var sourceX = Math.max(x - radius + 110, 0);
         var sourceY = Math.max(y - radius + 110, 0);
         zoomContext.drawImage(self.canvas, sourceX, sourceY, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);

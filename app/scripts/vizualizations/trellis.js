@@ -11,6 +11,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
           var elementsToUpdate = [];
 
+
+          //canvas animation function
           var requestAnimFrame = (function () {
             return window.requestAnimationFrame ||
               window.webkitRequestAnimationFrame ||
@@ -40,8 +42,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
               circle.height = defaultRadius * 2;
               var circleContext = circle.getContext('2d');
 
-//              circleContext.clearRect(0,0, defaultRadius * 2, defaultRadius * 2);
-
               circleContext.beginPath();
               //circleContext.arc(defaultRadius, defaultRadius, defaultRadius, 2 * Math.PI, false);
 
@@ -62,8 +62,6 @@ angular.module('trellis', ['dataProvider', 'd3'])
               return circle;
             }
 
-            //eraser
-            //var eraser = createCircleImage('rgba(255,255,255,1)', 'white', 1);
 
             var selectedCirclesPrerendered = {};
             var unselectedCirclesPrerendered = {};
@@ -366,7 +364,7 @@ angular.module('trellis', ['dataProvider', 'd3'])
                     var outOfSelection = e[0][0] > item[xProp] || item[xProp] > e[1][0] ||
                       e[0][1] > item[yProp] || item[yProp] > e[1][1];
 
-                    if (item.isSelected() == outOfSelection) {
+                    if (item.isSelected() === outOfSelection) {
                       //  elementsChanged = true;
                       item.select(!outOfSelection);
                       elementsToUpdate.push(item);
