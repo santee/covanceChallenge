@@ -360,8 +360,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       self.modifier = modifier || 2;
       self.parentElement = parentElement;
 
-      self.height = originalHeight;
-      self.width = originalWidth;
+      self.height = originalHeight  * self.modifier;
+      self.width = originalWidth  * self.modifier;
 
       self.canvas = document.createElement('canvas');
 
@@ -380,9 +380,14 @@ angular.module('radial', ['dataProvider', 'd3'])
 
       self.setSvg = function (element) {
         var xml = (new XMLSerializer()).serializeToString(element);
-        self.ctx.clearRect(0, 0, self.width, self.height);
 
+        self.ctx.save();
+
+        self.ctx.clearRect(0, 0, self.width, self.height);
+        self.ctx.scale(self.modifier, self.modifier);
         self.ctx.drawSvg(xml, 0, 0, self.width, self.height);
+
+        self.ctx.restore();
       };
 
       self.getZoomedCanvas = function (x, y) {
@@ -401,13 +406,12 @@ angular.module('radial', ['dataProvider', 'd3'])
         zoomContext.arc(radius, radius, radius, 0, 2 * Math.PI);
         zoomContext.clip();
 
-        zoomContext.scale(self.modifier, self.modifier);
-
-
+        zoomContext.fillStyle = 'white';
+        zoomContext.fillRect(0,0, radius * 2, radius * 2);
 
         //adjusting coordinates...
-        var sourceX = Math.max(x - radius + 110, 0);
-        var sourceY = Math.max(y - radius + 110, 0);
+        var sourceX = Math.max(x - radius + 110, 0) * self.modifier;
+        var sourceY = Math.max(y - radius + 110, 0) * self.modifier;
         zoomContext.drawImage(self.canvas, sourceX, sourceY, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
         zoomContext.restore();
 
