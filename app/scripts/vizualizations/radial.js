@@ -370,8 +370,8 @@ angular.module('radial', ['dataProvider', 'd3'])
       self.canvas.width = self.width;
       self.canvas.height = self.height;
       self.canvas.style['pointer-events'] = 'none';
-      self.canvas.style.height = self.height + 'px';
-      self.canvas.style.width = self.width + 'px';
+      //self.canvas.style.height = self.height + 'px';
+      //self.canvas.style.width = self.width + 'px';
       self.canvas.style.visibility = 'hidden';
 
       self.ctx = self.canvas.getContext('2d');
