@@ -403,6 +403,8 @@ angular.module('radial', ['dataProvider', 'd3'])
 
         zoomContext.scale(self.modifier, self.modifier);
 
+
+
         //adjusting coordinates...
         var sourceX = Math.max(x - radius + 110, 0);
         var sourceY = Math.max(y - radius + 110, 0);
