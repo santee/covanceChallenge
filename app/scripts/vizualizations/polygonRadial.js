@@ -17,9 +17,11 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       };
     }])
 
-  .service('d3PolygonRadialLink', ['$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService', 'infoBoxLoader',
-    function ($q, d3, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader) {
+  .service('d3PolygonRadialLink', ['$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService', 'infoBoxLoader', 'initializeArea',
+    function ($q, d3, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader, initializeArea) {
       return function (scope, element) {
+
+        initializeArea(scope, element);
 
         var infoBoxLoading = infoBoxLoader(scope, element);
         $q.all(clusteredData, infoBoxLoading).then(function(cluster, infobox) {
@@ -29,10 +31,19 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       };
     }])
 
-  .service('areaInitializer', ['d3',
+  .service('initializeArea', ['d3',
     function(d3) {
       return function(scope, element) {
+        scope.width = d3.select(element[0]).node().offsetWidth;
+        scope.height = width;
 
+        scope.svg = d3.select(element[0])
+          .append('svg')
+          .style('height', height + 'px')
+          .style('width', '100%');
+
+        scope.area = scope.svg.append('g')
+          .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
       };
     }])
 
