@@ -24,7 +24,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         initializeArea(scope, element);
 
         var infoBoxLoading = infoBoxLoader(scope, element);
-        $q.all(clusteredData, infoBoxLoading).then(function(cluster, infobox) {
+        $q.all(clusteredData, infoBoxLoading).then(function (cluster, infobox) {
           scope.cluster = cluster;
           scope.infobox = infobox;
         });
@@ -32,18 +32,18 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
     }])
 
   .service('initializeArea', ['d3',
-    function(d3) {
-      return function(scope, element) {
+    function (d3) {
+      return function (scope, element) {
         scope.width = d3.select(element[0]).node().offsetWidth;
-        scope.height = width;
+        scope.height = scope.width;
 
         scope.svg = d3.select(element[0])
           .append('svg')
-          .style('height', height + 'px')
+          .style('height', scope.height + 'px')
           .style('width', '100%');
 
         scope.area = scope.svg.append('g')
-          .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+          .attr('transform', 'translate(' + scope.width / 2 + ',' + scope.height / 2 + ')');
       };
     }])
 
@@ -59,10 +59,10 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           element[0].appendChild(box);
           $compile(box)(scope);
           deferred.resolve(box);
-        }, function(error) {
+        }, function (error) {
           deferred.reject(error);
         });
 
         return deferred.promise;
       };
-  }]);
+    }]);
