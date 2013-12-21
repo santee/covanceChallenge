@@ -33,12 +33,19 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           scope.infobox = infobox;
           var partitionManager = new PartitionManager(scope, scope.cluster);
           var painter = new Painter(scope, partitionManager.getNodes());
-          //painter.render();
+
+          //Cross-directives event handling
 
           $rootScope.$watch(function() {
             return scope.displayDepth;
           }, function() {
             painter.render(partitionManager.getNodes());
+          });
+
+          itemsSelectionService.onClusterSelectionChanged(function (e) {
+            if (e.cluster.items.length !== 0) {
+              painter.repaintLeafs([e.cluster]);
+            }
           });
 
         });
