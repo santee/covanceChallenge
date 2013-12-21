@@ -113,7 +113,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       }
 
       function getStrokeWidth(item) {
-        return item.dx >= 0.01 ? 1 : 0;
+        return item.dx >= 0.01 || item.isSelected() ? 1 : 0;
       }
 
       self.drawnPoints = [];
@@ -190,14 +190,18 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       };
 
 
+      self.repaintAll = function() {
+        scope.svg.selectAll('polygon').call(drawPolygons);
+      };
+
+      function onClusterClick(node) {
+        itemsSelectionService.toggleClusterSelection(node);
+        self.repaintAll();
+        $rootScope.$apply();
+      }
+
 
       self.render = function(nodes){
-
-        function onClusterClick(node) {
-          itemsSelectionService.toggleClusterSelection(node);
-          self.render(nodes);
-          $rootScope.$apply();
-        }
 
         var elements =
           scope
