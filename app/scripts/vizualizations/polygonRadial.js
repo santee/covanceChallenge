@@ -17,11 +17,10 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       };
     }])
 
-  .service('d3PolygonRadialLink', ['$q', 'd3', 'clusteredData', '$rootScope', 'itemsSelectionService', 'infoBoxLoader', 'initializeArea', 'PartitionManager', 'Painter',
-    function ($q, d3, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader, initializeArea, PartitionManager, Painter ) {
+  .service('d3PolygonRadialLink', ['$q', 'clusteredData', '$rootScope', 'itemsSelectionService', 'infoBoxLoader', 'initializeArea', 'PartitionManager', 'Painter',
+    function ($q, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader, initializeArea, PartitionManager, Painter ) {
       return function (scope, element) {
 
-        scope.enableFisheye = true;
         scope.pointedCluster = null;
 
         initializeArea(scope, element);
@@ -35,6 +34,12 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           var painter = new Painter(scope, partitionManager.getNodes());
 
           //Cross-directives event handling
+
+          $rootScope.$watch(function() {
+            return scope.enableFisheye;
+          }, function() {
+            painter.fisheyeEnabled = scope.enableFisheye;
+          });
 
           $rootScope.$watch(function() {
             return scope.displayDepth;
@@ -89,11 +94,17 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         return deferred.promise;
       };
     }])
-  .service('Painter', ['$rootScope', 'itemsSelectionService', function($rootScope, itemsSelectionService) {
+  .service('Painter', ['$rootScope', 'd3', 'itemsSelectionService', function($rootScope, d3, itemsSelectionService) {
     var identity = function(d) { return d.id; };
 
     function Painter(scope) {
       var self = this;
+
+      var fisheye = d3.fisheye.circular()
+        .radius(scope.radius / 2)
+        .distortion(4);
+
+      self.fisheyeEnabled = false;
 
       var selectedColor = 'yellow';
       var selectedStroke = '#888';
@@ -152,10 +163,17 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
             return [];
           }
           return angles.map(function(angle) {
-            return {
+
+            var coordinates = {
               x : radius * Math.cos(angle) + scope.radius,
               y : radius * Math.sin(angle) + scope.radius
             };
+
+            if (self.fisheyeEnabled) {
+              coordinates = fisheye(coordinates);
+            }
+
+            return coordinates;
           });
         }
 
@@ -207,6 +225,14 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         $rootScope.$apply();
       }
 
+      var applyFisheye = function() {
+        fisheye.focus(d3.mouse(this));
+        scope
+          .svg
+          .selectAll('polygon')
+          .attr('points', getPointsStringed);
+      };
+
 
       self.render = function(nodes){
 
@@ -221,7 +247,8 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           .append('polygon')
           .attr('class', 'arc')
           .call(drawPolygons)
-          .on('click', onClusterClick);
+          .on('click', onClusterClick)
+          .on('mousemove', applyFisheye);
 
         elements
           .exit()
