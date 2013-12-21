@@ -62,7 +62,9 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         scope.width = d3.select(element[0]).node().offsetWidth;
         scope.height = scope.width;
         scope.center = { x: scope.width / 2, y: scope.height / 2 };
-        scope.radius = Math.min(scope.width, scope.height) / 2.2;
+        scope.radius = Math.min(scope.width, scope.height) / 2.4;
+        scope.centerX = scope.width / 2;
+        scope.centerY = scope.height / 2;
 
         scope.svg = d3.select(element[0])
           .append('svg')
@@ -165,8 +167,8 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           return angles.map(function (angle) {
 
             var coordinates = {
-              x: radius * Math.cos(angle) + scope.radius,
-              y: radius * Math.sin(angle) + scope.radius
+              x: radius * Math.cos(angle) + scope.centerX,
+              y: radius * Math.sin(angle) + scope.centerY
             };
 
             if (self.fisheyeEnabled) {
