@@ -82,6 +82,14 @@ angular.module('dataProvider')
       };
 
 
+      self.getDescendants = function() {
+        var descendants = _.reduce( self.children, function(memo,child){
+          return memo.concat(child.getDescendants());
+        }, self.children);
+
+        return descendants;
+      };
+
       self.isDescendantOf = function(ancestor) {
         if (self.parent === ancestor) {
           return true;

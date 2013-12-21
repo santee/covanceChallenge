@@ -89,8 +89,8 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       var self = this;
 
       var selectedColor = 'yellow';
-      var selectedStroke = 'black';
-      var defaultStroke = 'white';
+      var selectedStroke = '#888';
+      var defaultStroke = '#888';
       var colorScale = d3.scale.category20b();
 
       function getColor(item) {
@@ -110,6 +110,10 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
       function getStrokeColor(item) {
         return item.isSelected() ? selectedStroke : defaultStroke;
+      }
+
+      function getStrokeWidth(item) {
+        return item.dx >= 0.01 ? 1 : 0;
       }
 
       self.drawnPoints = [];
@@ -170,16 +174,31 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         polygons
           .style('fill', getColor)
           .style('stroke', getStrokeColor)
+          .style('stroke-width', getStrokeWidth)
           .attr('points', getPointsStringed);
       }
 
-      function onClusterClick(node) {
-        itemsSelectionService.toggleClusterSelection(node);
-        scope.repaint();
-        $rootScope.$apply();
-      }
+      //repaints only selected leafs
+      self.repaintLeafs = function(elements) {
+        scope
+          .svg
+          .selectAll('polygon')
+          .filter(function(d) {
+            return _.contains(elements, d);
+          })
+          .call(drawPolygons);
+      };
+
+
 
       self.render = function(nodes){
+
+        function onClusterClick(node) {
+          itemsSelectionService.toggleClusterSelection(node);
+          self.render(nodes);
+          $rootScope.$apply();
+        }
+
         var elements =
           scope
           .svg
@@ -191,7 +210,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           .append('polygon')
           .attr('class', 'arc')
           .call(drawPolygons)
-          .on('mouseclick', onClusterClick);
+          .on('click', onClusterClick);
 
         elements
           .exit()
