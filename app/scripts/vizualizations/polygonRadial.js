@@ -81,16 +81,51 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
       self.drawnPoints = [];
 
-//      self.repaintLeaf = function(node) {
-//        scope.arcs
-//          .data([node], identity)
-//          .
-//      };
+      function getInnerRadius(node) {
+        return Math.sqrt(node.y * (node.nodeDepth) / (scope.displayDepth + 1));
+      }
+
+      function getOuterRadius(node) {
+        return Math.sqrt((node.y + node.dy) * ( node.nodeDepth + 1) / (scope.displayDepth + 1));
+      }
 
       function getPoints(node) {
-        var id = node.id;
-        //var points = drawPolygons[id];
-        return [ { x : 0, y : 0}, { x: 1, y: 1} ];
+        var gap = 0.1; //5.73 degrees
+
+        //calculate anchor angles
+        var endAngle = node.x + node.dx;
+        var currentAngle = node.x;
+        var angles = [currentAngle];
+        do {
+          var angleLeft = endAngle - currentAngle;
+          currentAngle += Math.min( gap, angleLeft);
+          angles.push(currentAngle);
+
+        } while(currentAngle < endAngle);
+
+        function calculatePoints(radius, angles) {
+          if (radius === 0) {
+            return [];
+          }
+          return angles.map(function(angle) {
+            return {
+              x : radius * Math.cos(angle) + scope.radius,
+              y : radius * Math.sin(angle) + scope.radius
+            };
+          });
+        }
+
+        //go through inner radius
+        var innerRadius = getInnerRadius(node);
+        var innerPoints = calculatePoints(innerRadius, angles);
+
+        //go through outer radius
+        var outerRadius = getOuterRadius(node);
+        var outerPoints = calculatePoints(outerRadius, angles.reverse());
+
+        var points = innerPoints.concat(outerPoints);
+        self.drawnPoints[node.id] = points;
+        return points;
       }
 
       function getPointsStringed(node) {
