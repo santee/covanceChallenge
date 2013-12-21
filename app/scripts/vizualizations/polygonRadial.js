@@ -22,6 +22,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       return function (scope, element) {
 
         scope.enableFisheye = true;
+        scope.pointedCluster = null;
 
         initializeArea(scope, element);
 
@@ -32,7 +33,14 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           scope.infobox = infobox;
           var partitionManager = new PartitionManager(scope, scope.cluster);
           var painter = new Painter(scope, partitionManager.getNodes());
-          painter.render();
+          //painter.render();
+
+          $rootScope.$watch(function() {
+            return scope.displayDepth;
+          }, function() {
+            painter.render(partitionManager.getNodes());
+          });
+
         });
       };
     }])
@@ -40,6 +48,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
   .service('initializeArea', ['d3',
     function (d3) {
       return function (scope, element) {
+
         scope.width = d3.select(element[0]).node().offsetWidth;
         scope.height = scope.width;
         scope.center = { x: scope.width / 2, y: scope.height / 2 };
@@ -73,11 +82,35 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         return deferred.promise;
       };
     }])
-  .service('Painter', ['d3', function(d3) {
+  .service('Painter', ['$rootScope', 'itemsSelectionService', function($rootScope, itemsSelectionService) {
     var identity = function(d) { return d.id; };
 
-    function Painter(scope, nodes) {
+    function Painter(scope) {
       var self = this;
+
+      var selectedColor = 'yellow';
+      var selectedStroke = 'black';
+      var defaultStroke = 'white';
+      var colorScale = d3.scale.category20b();
+
+      function getColor(item) {
+        if (item.isSelected()) {
+          return selectedColor;
+        }
+
+        var id = item.id;
+
+        var elem = item;
+        while (elem.parent !== null && elem.parent.nodes[0].id === elem.id) {
+          id = elem.parent.id;
+          elem = elem.parent;
+        }
+        return colorScale(id);
+      }
+
+      function getStrokeColor(item) {
+        return item.isSelected() ? selectedStroke : defaultStroke;
+      }
 
       self.drawnPoints = [];
 
@@ -135,13 +168,18 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
       function drawPolygons(polygons) {
         polygons
-          .style('fill', 'black')
-          .style('stroke', 'white')
+          .style('fill', getColor)
+          .style('stroke', getStrokeColor)
           .attr('points', getPointsStringed);
-
       }
 
-      self.render = function(){
+      function onClusterClick(node) {
+        itemsSelectionService.toggleClusterSelection(node);
+        scope.repaint();
+        $rootScope.$apply();
+      }
+
+      self.render = function(nodes){
         var elements =
           scope
           .svg
@@ -151,12 +189,16 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         elements
           .enter()
           .append('polygon')
-          .call(drawPolygons);
-
+          .attr('class', 'arc')
+          .call(drawPolygons)
+          .on('mouseclick', onClusterClick);
 
         elements
           .exit()
           .remove();
+
+        elements
+          .call(drawPolygons);
       };
     }
 
