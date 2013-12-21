@@ -54,7 +54,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           .attr('transform', 'translate(' + scope.width / 2 + ',' + scope.height / 2 + ')');
       };
     }])
-  .service('infoBoxLoader', ['$compile, $http, $q',
+  .service('infoBoxLoader', ['$compile', '$http', '$q',
     function ($compile, $http, $q) {
       return function (scope, element) {
 
@@ -63,8 +63,8 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         var loader = $http.get('/views/partials/clusterInfo.html');
         loader.then(function (html) {
           var box = angular.element(html.data);
-          element[0].appendChild(box);
           $compile(box)(scope);
+          element.append(box);
           deferred.resolve(box);
         }, function (error) {
           deferred.reject(error);
@@ -77,23 +77,46 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
     var identity = function(d) { return d.id; };
 
     function Painter(scope, nodes) {
-
       var self = this;
+
+      self.drawnPoints = [];
+
 //      self.repaintLeaf = function(node) {
 //        scope.arcs
 //          .data([node], identity)
 //          .
 //      };
 
+      function getPoints(node) {
+        var id = node.id;
+        //var points = drawPolygons[id];
+        return [ { x : 0, y : 0}, { x: 1, y: 1} ];
+      }
+
+      function getPointsStringed(node) {
+        var points = getPoints(node);
+        return points.map(function(d) { return d.x + ',' + d.y; }).join(' ');
+      }
+
+      function drawPolygons(polygons) {
+        polygons
+          .style('fill', 'black')
+          .style('stroke', 'white')
+          .attr('points', getPointsStringed);
+
+      }
+
       self.render = function(){
-        var elements = scope
+        var elements =
+          scope
+          .svg
           .selectAll('polygon')
           .data(nodes, identity);
 
         elements
           .enter()
           .append('polygon')
-          .attr('points', '');
+          .call(drawPolygons);
 
 
         elements
@@ -132,8 +155,6 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       self.getNodes = function() {
         return partition.nodes(cluster);
       };
-
-      return partition;
     }
 
     return PartitionManager;

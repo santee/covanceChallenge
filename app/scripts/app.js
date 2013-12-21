@@ -7,6 +7,7 @@ angular.module('covanceChallengeApp', [
   'ngRoute',
   'dataProvider',
   'radial',
+  'polygonRadial',
   'trellis',
   'items'
 ])
