@@ -150,14 +150,14 @@ angular.module('trellis', ['dataProvider', 'd3'])
           $q.all([itemPropertiesSelector.deferred, clusteredData]).then(function (values) {
 
             var properties = values[0];
-            var cluster = values[1];
+            scope.cluster = values[1];
 
             scope.selectedNumericProperties = properties.selectedNumericProperties;
             scope.selectedTextProperties = properties.selectedTextProperties;
 
             scope.clusterItems = [];
 
-            scope.clusterItems = cluster.getAllItems();
+            scope.clusterItems = scope.cluster.getAllItems();
             scope.render();
 
           });
@@ -331,6 +331,8 @@ angular.module('trellis', ['dataProvider', 'd3'])
 
                 var brushStart = function () {
                   itemsSelectionService.currentSelector = itemsSelectionService.Selectors.ITEMS;
+
+                  scope.cluster.select(false);
 
                   if (brushCell !== this) {
                     currentBrush = brush;

@@ -18,7 +18,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
     }])
 
   .service('d3PolygonRadialLink', ['$q', 'clusteredData', '$rootScope', 'itemsSelectionService', 'infoBoxLoader', 'initializeArea', 'PartitionManager', 'Painter',
-    function ($q, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader, initializeArea, PartitionManager, Painter ) {
+    function ($q, clusteredData, $rootScope, itemsSelectionService, infoBoxLoader, initializeArea, PartitionManager, Painter) {
       return function (scope, element) {
 
         scope.pointedCluster = null;
@@ -35,22 +35,20 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
           //Cross-directives event handling
 
-          $rootScope.$watch(function() {
+          $rootScope.$watch(function () {
             return scope.enableFisheye;
-          }, function() {
+          }, function () {
             painter.fisheyeEnabled = scope.enableFisheye;
           });
 
-          $rootScope.$watch(function() {
+          $rootScope.$watch(function () {
             return scope.displayDepth;
-          }, function() {
+          }, function () {
             painter.render(partitionManager.getNodes());
           });
 
           itemsSelectionService.onClusterSelectionChanged(function (e) {
-            if (e.cluster.items.length !== 0) {
-              painter.repaintLeafs([e.cluster]);
-            }
+            painter.repaintLeafs([e.cluster]);
           });
 
         });
@@ -94,8 +92,10 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         return deferred.promise;
       };
     }])
-  .service('Painter', ['$rootScope', 'd3', 'itemsSelectionService', function($rootScope, d3, itemsSelectionService) {
-    var identity = function(d) { return d.id; };
+  .service('Painter', ['$rootScope', 'd3', 'itemsSelectionService', function ($rootScope, d3, itemsSelectionService) {
+    var identity = function (d) {
+      return d.id;
+    };
 
     function Painter(scope) {
       var self = this;
@@ -153,20 +153,20 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         var angles = [currentAngle];
         do {
           var angleLeft = endAngle - currentAngle;
-          currentAngle += Math.min( gap, angleLeft);
+          currentAngle += Math.min(gap, angleLeft);
           angles.push(currentAngle);
 
-        } while(currentAngle < endAngle);
+        } while (currentAngle < endAngle);
 
         function calculatePoints(radius, angles) {
           if (radius === 0) {
             return [];
           }
-          return angles.map(function(angle) {
+          return angles.map(function (angle) {
 
             var coordinates = {
-              x : radius * Math.cos(angle) + scope.radius,
-              y : radius * Math.sin(angle) + scope.radius
+              x: radius * Math.cos(angle) + scope.radius,
+              y: radius * Math.sin(angle) + scope.radius
             };
 
             if (self.fisheyeEnabled) {
@@ -192,7 +192,9 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
       function getPointsStringed(node) {
         var points = getPoints(node);
-        return points.map(function(d) { return d.x + ',' + d.y; }).join(' ');
+        return points.map(function (d) {
+          return d.x + ',' + d.y;
+        }).join(' ');
       }
 
       function drawPolygons(polygons) {
@@ -204,18 +206,18 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       }
 
       //repaints only selected leafs
-      self.repaintLeafs = function(elements) {
+      self.repaintLeafs = function (elements) {
         scope
           .svg
           .selectAll('polygon')
-          .filter(function(d) {
+          .filter(function (d) {
             return _.contains(elements, d);
           })
           .call(drawPolygons);
       };
 
 
-      self.repaintAll = function() {
+      self.repaintAll = function () {
         scope.svg.selectAll('polygon').call(drawPolygons);
       };
 
@@ -225,7 +227,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         $rootScope.$apply();
       }
 
-      var applyFisheye = function() {
+      var applyFisheye = function () {
         fisheye.focus(d3.mouse(this));
         scope
           .svg
@@ -234,13 +236,13 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       };
 
 
-      self.render = function(nodes){
+      self.render = function (nodes) {
 
         var elements =
           scope
-          .svg
-          .selectAll('polygon')
-          .data(nodes, identity);
+            .svg
+            .selectAll('polygon')
+            .data(nodes, identity);
 
         elements
           .enter()
@@ -261,7 +263,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
     return Painter;
   }])
-  .service('PartitionManager', ['d3', function(d3) {
+  .service('PartitionManager', ['d3', function (d3) {
 
 
     function PartitionManager(scope, cluster) {
@@ -286,7 +288,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         .children(partitionChildren)
         .value(partitionValue);
 
-      self.getNodes = function() {
+      self.getNodes = function () {
         return partition.nodes(cluster);
       };
     }
