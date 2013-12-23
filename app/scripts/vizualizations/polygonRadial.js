@@ -171,7 +171,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
               y: radius * Math.sin(angle) + scope.centerY
             };
 
-            if (self.fisheyeEnabled) {
+            if (self.fisheyeEnabled && self.mouseOnField) {
               coordinates = fisheye(coordinates);
             }
 
@@ -229,6 +229,19 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
         $rootScope.$apply();
       }
 
+      var onElementEnter = function (node) {
+        scope.pointedCluster = node;
+        var coordinates = d3.mouse(this);
+        scope.tooltipX = (coordinates[0] + 20) + 'px';
+        scope.tooltipY = (coordinates[1] + 10) + 'px';
+        $rootScope.$apply();
+      };
+
+      var onElementLeave = function () {
+        scope.pointedCluster = null;
+        $rootScope.$apply();
+      };
+
       var applyFisheye = function () {
         fisheye.focus(d3.mouse(this));
         scope
@@ -236,6 +249,15 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           .selectAll('polygon')
           .attr('points', getPointsStringed);
       };
+
+      scope
+        .svg
+        .on('mousemove', applyFisheye)
+        .on('mouseenter', function() { self.mouseOnField = true; })
+        .on('mouseleave', function() {
+          self.mouseOnField = false;
+          self.repaintAll();
+        });
 
 
       self.render = function (nodes) {
@@ -252,7 +274,8 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
           .attr('class', 'arc')
           .call(drawPolygons)
           .on('click', onClusterClick)
-          .on('mousemove', applyFisheye);
+          .on('mouseenter', onElementEnter)
+          .on('mouseleave', onElementLeave);
 
         elements
           .exit()
