@@ -266,7 +266,6 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       scope
         .svg
         .on('mousemove', applyFisheye)
-        .on('touchmove', applyFisheye)
         .on('mouseenter', function() { self.mouseOnField = true; })
         .on('mouseleave', function() {
           self.mouseOnField = false;
