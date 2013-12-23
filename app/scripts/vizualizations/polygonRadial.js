@@ -194,9 +194,22 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
 
       function getPointsStringed(node) {
         var points = getPoints(node);
-        return points.map(function (d) {
-          return d.x + ',' + d.y;
-        }).join(' ');
+
+        var length = points.length;
+        var str = '';
+        for (var i = 0; i < length; ++i) {
+          var point = points[i];
+          str += point.x + ',' + point.y;
+          if (i !== length - 1) {
+            str += ' ';
+          }
+        }
+        return str;
+
+//
+//        return points.map(function (d) {
+//          return d.x + ',' + d.y;
+//        }).join(' ');
       }
 
       function drawPolygons(polygons) {
@@ -253,6 +266,7 @@ angular.module('polygonRadial', ['dataProvider', 'd3'])
       scope
         .svg
         .on('mousemove', applyFisheye)
+        .on('touchmove', applyFisheye)
         .on('mouseenter', function() { self.mouseOnField = true; })
         .on('mouseleave', function() {
           self.mouseOnField = false;
