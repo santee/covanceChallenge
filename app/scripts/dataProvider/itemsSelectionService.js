@@ -28,16 +28,6 @@ angular.module('dataProvider')
       document.dispatchEvent(clusterSelectedEvent);
     };
 
-    var hierarchySelectedEvent = document.createEvent('Event');
-    hierarchySelectedEvent.initEvent('hierarchySelectedEvent', true, true);
-    scope.onHierarchySelectionChanged = function(callback) {
-      document.addEventListener('hierarchySelectedEvent', callback, false);
-    };
-
-    scope.raiseHierarchySelectionChanged = function(cluster) {
-      document.dispatchEvent(hierarchySelectedEvent);
-    };
-
     $rootScope.$watch(
       function() {
         return scope.currentSelector;
@@ -74,7 +64,6 @@ angular.module('dataProvider')
       }
 
       scope.currentSelector = scope.Selectors.CLUSTER;
-      scope.raiseHierarchySelectionChanged();
     };
 
     return scope;

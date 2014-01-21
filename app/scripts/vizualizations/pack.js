@@ -23,42 +23,54 @@ angular.module('pack', ['dataProvider', 'd3'])
           var center = { x: width / 2, y: height / 2 };
           var radius = Math.min(width, height) / 2.4;
 
+          var clusterData = [];
+          var pack = d3.layout.pack()
+              .size([radius * 2 , radius * 2])
+              .value(function (d) {
+                return d.commonNumericProperties &&
+                    d.commonNumericProperties.length > 0 &&
+                    d.averageNumericValues &&
+                    d.averageNumericValues[d.commonNumericProperties[0]] ?
+                    d.averageNumericValues[d.commonNumericProperties[0]] : 0;
+              })
+              .children(function (d) {
+                return d.nodes;
+              });
+
           var svg = d3.select(element[0])
               .append('svg')
               .attr('width', width)
               .attr('height', height);
 
-          $q.all(clusteredData).then(function (cluster, infobox) {
-            var pack = d3.layout.pack()
-                .size([radius * 2 , radius * 2])
-                .value(function (d) {
-                  return d.commonNumericProperties &&
-                      d.commonNumericProperties.length > 0 &&
-                      d.averageNumericValues &&
-                      d.averageNumericValues[d.commonNumericProperties[0]] ?
-                      d.averageNumericValues[d.commonNumericProperties[0]] : 0;
-                })
-                .children(function (d) {
-                  return d.nodes;
-                });
+          $q.all(clusteredData).then(function (cluster) {
 
-            render(pack, cluster);
+            clusterData = cluster;
+            reRender();
 
             $rootScope.$watch(function () {
               return scope.displayDepth;
             }, function () {
-              hideCircles();
+              reRender();
             });
 
-            itemsSelectionService.onHierarchySelectionChanged(function () {
+            itemsSelectionService.onClusterSelectionChanged(function (e) {
               svg.selectAll('circle')
+                  .filter(function (d) {
+                    return e.cluster === d;
+                  })
                   .attr('fill', getColor);
             });
           });
 
-          var render = function (pack, cluster) {
+          var reRender = function () {
+            svg.selectAll('circle').remove();
+
+            var nodesData = pack.nodes(clusterData).filter(function (node) {
+              return node.depth <= scope.displayDepth;
+            });
+
             svg.selectAll('circle')
-                .data(pack.nodes(cluster))
+                .data(nodesData)
                 .enter()
                 .append('svg:circle')
                 .attr('cx', function (d) {
@@ -81,26 +93,6 @@ angular.module('pack', ['dataProvider', 'd3'])
                 .on('click', function (d) {
                   onClusterClick(d);
                 });
-          };
-
-          var hideCircles = function () {
-
-            //var transform = d3.svg.transform()
-            //    .scale(function () {
-            //      return scope.displayDepth;
-            //    });
-//
-            svg.selectAll('circle')
-                .attr('display', function (d) {
-                  return d.depth <= scope.displayDepth ? '' : 'none';
-                });
-
-            //svg.selectAll('circle')
-            //    .transition()
-            //    .duration(500)
-            //    .attr('r', function (d) {
-            //      return d.r* scope.displayDepth/5;
-            //    });
           };
 
           var colorScale = d3.scale.category20b();
