@@ -28,7 +28,6 @@ angular.module('dataProvider')
       document.dispatchEvent(clusterSelectedEvent);
     };
 
-
     $rootScope.$watch(
       function() {
         return scope.currentSelector;

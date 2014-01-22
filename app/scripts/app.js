@@ -9,7 +9,8 @@ angular.module('covanceChallengeApp', [
   'radial',
   'polygonRadial',
   'trellis',
-  'items'
+  'items',
+  'pack'
 ])
   .config(function ($routeProvider, $locationProvider) {
     $routeProvider
